@@ -148,7 +148,7 @@ flowchart TD
 
 ## ⚡ ШВИДКИЙ СТАРТ (Quick Start)
 
-Станом на **липень 2026 року (07.2026)**, ви можете розгорнути локальну ШІ-лабораторію за двома основними сценаріями:
+Станом на **серпень 2026 року (08.2026)**, ви можете розгорнути локальну ШІ-лабораторію за двома основними сценаріями:
 
 ### Опція А: Стандартний стек (Ollama + Open WebUI) — Рекомендовано для початківців
 
@@ -192,11 +192,11 @@ flowchart TD
 Цей стек розгорнуто на нашій виділеній робочій станції **WS (IP: 100.68.179.109 / 192.168.2.24)** для максимальної швидкості (MTP, Flash Attention, 128K context).
 
 1. **Запуск обчислювального ядра (Llama.cpp Server):**
-   Створіть systemd-сервіс `/etc/systemd/system/llama-server.service` для автоматичного запуску (налаштовано під Xeon E5-2666 v3 + 11GB VRAM на RTX 2080 Ti з використанням локальної reasoning-моделі Ornith-1.0-35B-MTP):
+   Створіть systemd-сервіс `/etc/systemd/system/llama-server.service` для автоматичного запуску (налаштовано під Xeon E5-2666 v3 + 11GB VRAM на RTX 2080 Ti з використанням локальної reasoning-моделі Qwen3.6-35B-A3B):
    ```bash
    # start_llama.sh
    /root/llama.cpp/build/bin/llama-server \
-       -m /root/llama-models/Ornith-1.0-35B-Q6_K-MTP.gguf \
+       -m /root/llama-models/Qwen3.6-35B-A3B-uncensored-heretic-Native-MTP-Preserved-Q4_K_M.gguf \
        -ngl 14 -t 10 -c 128000 -fa on -np 1 -b 512 -ub 512 \
        -ctk q8_0 -ctv q8_0 -fit off \
        --spec-type draft-mtp --spec-draft-n-max 2 \
@@ -207,7 +207,7 @@ flowchart TD
    Прив'яжіть клієнт до локального сервера з підтримкою автоматичного спадання (fallback) на хмару та збереженням думок (`preserve_thinking`):
    ```json
    {
-     "model": "local-infrastructure/ornith-1.0-35b-it",
+     "model": "local-infrastructure/qwen3.6-35b-a3b",
      "provider": {
        "local-infrastructure": {
          "npm": "@ai-sdk/openai-compatible",
@@ -217,8 +217,8 @@ flowchart TD
            "apiKey": "sk-llama-cpp-local-token"
          },
          "models": {
-           "ornith-1.0-35b-it": {
-             "name": "Ornith-1.0 35B Local (MTP)",
+           "qwen3.6-35b-a3b": {
+             "name": "Qwen3.6 35B A3B Local (MTP)",
              "limit": { "context": 128000, "output": 4096 }
            }
          }
@@ -229,7 +229,7 @@ flowchart TD
    ```
 3. **Запустіть клієнт:**
    ```bash
-   opencode --model local-infrastructure/ornith-1.0-35b-it
+   opencode --model local-infrastructure/qwen3.6-35b-a3b
    ```
 
 #### 📊 Моніторинг сесій
@@ -370,7 +370,7 @@ flowchart TD
 ## 🗺️ ДОРОЖНЯ КАРТА (ROADMAP)
 
 > [!NOTE]
-> Станом на **16 червня 2026 року (16.06.2026)**, Фазу 1 (Фундамент) повністю завершено із випередженням графіку! Проєкт активно працює над реалізацією Фази 2. Проведено апаратні бенчмарки на базі моделі Gemma 4 26B (MoE) на робочій станції WS.
+> Станом на **серпень 2026 року (08.2026)**, Фазу 1 (Фундамент) повністю завершено із випередженням графіку! Проєкт активно працює над реалізацією Фази 2. Проведено апаратні бенчмарки на базі моделей Gemma 4 26B (MoE), Qwen 3.6 35B (MoE, MTP) та Ornith 1.0 35B (MoE, MTP) на робочій станції WS.
 
 ### 🏁 Фаза 1 — Фундамент (Q3 2026) — 🎉 Виконано достроково!
 
@@ -492,11 +492,11 @@ description: AI-HomeLab: домашні AI-лабораторії в Украї�
 applicationCategory: EducationalApplication
 applicationSubCategory: AI
 operatingSystem: Linux
-softwareVersion: 1.0.0
+softwareVersion: 1.3.0
 keywords: ai, llm, local-ai, rag, agents, self-hosted, homelab, ukraine, open-source, cost-optimization, low-code
 author: Weby Homelab (https://github.com/weby-homelab)
 codeRepository: https://github.com/weby-homelab/AI-HOMELAB
 downloadUrl: https://github.com/weby-homelab/AI-HOMELAB/releases
-license: GPL-3.0
+license: MIT
 isAccessibleForFree: true
 -->
