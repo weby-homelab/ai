@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import difflib
+
 import typer
 from rich.console import Console
 
@@ -19,7 +20,7 @@ def render_diff(old: str, new: str, path: str) -> str:
     colored = []
     for line in diff_lines:
         line = line.rstrip()
-        if line.startswith("---") or line.startswith("+++"):
+        if line.startswith(("---", "+++")):
             colored.append(f"[bold]{line}[/bold]")
         elif line.startswith("-"):
             colored.append(f"[red]{line}[/red]")

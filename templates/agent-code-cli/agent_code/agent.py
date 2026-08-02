@@ -3,10 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
 from rich.console import Console
 
-from .model import ModelProvider, ModelResponse, ToolResult
-from .tools import ToolContext, ToolRegistry
+from .compact_basic import compact
 from .fs_safety import (
     SkipPolicy,
     apply_single_replace,
@@ -15,7 +15,8 @@ from .fs_safety import (
     load_gitignore,
     resolve_in_cwd,
 )
-
+from .model import ModelProvider, ModelResponse, ToolResult
+from .permissions import PermissionRequest, decide_permission
 from .prompt_ui import (
     confirm_command,
     confirm_edit,
@@ -23,9 +24,8 @@ from .prompt_ui import (
     prompt_single_choice,
     render_diff,
 )
-from .permissions import PermissionRequest, decide_permission
 from .session import Session
-from .compact_basic import compact
+from .tools import ToolContext, ToolRegistry
 
 console = Console()
 
@@ -80,9 +80,7 @@ def _assistant_message(response: ModelResponse) -> dict[str, Any]:
     return {"role": "assistant", "content": content}
 
 
-def _tool_result_message(
-    tool_call_id: str, content: str, is_error: bool = False
-) -> dict[str, Any]:
+def _tool_result_message(tool_call_id: str, content: str, is_error: bool = False) -> dict[str, Any]:
     return {
         "role": "user",
         "content": [
@@ -233,9 +231,7 @@ def run_agent(
                 edit_preview = (path_str, old_content, new_content)
 
             if decision.behavior == "deny":
-                result = ToolResult(
-                    call.id, f"error: {decision.message}", is_error=True
-                )
+                result = ToolResult(call.id, f"error: {decision.message}", is_error=True)
                 emit(f"observation: {result.content}")
                 tool_result_blocks.append(
                     {
@@ -315,13 +311,9 @@ def run_agent(
                     labels = [str(o) for o in options]
                     selected = prompt_single_choice(question, labels)
                     if selected is None:
-                        result = ToolResult(
-                            call.id, "User skipped the question.", is_error=False
-                        )
+                        result = ToolResult(call.id, "User skipped the question.", is_error=False)
                     else:
-                        result = ToolResult(
-                            call.id, f'User selected: "{selected}"', is_error=False
-                        )
+                        result = ToolResult(call.id, f'User selected: "{selected}"', is_error=False)
                     emit(f"observation: {result.content}")
                     tool_result_blocks.append(
                         {

@@ -101,17 +101,14 @@ def ensure_within_size(path: Path, max_bytes: int = MAX_READ_BYTES) -> None:
     size = path.stat().st_size
     if size > max_bytes:
         raise ValueError(
-            f"file too large: {size} bytes > {max_bytes}; "
-            f"read a smaller file or use grep instead"
+            f"file too large: {size} bytes > {max_bytes}; read a smaller file or use grep instead"
         )
 
 
 def should_skip(rel_path: Path, policy: SkipPolicy) -> bool:
     if any(part in policy.skip_dirs for part in rel_path.parts):
         return True
-    if policy.gitignore is not None and policy.gitignore.match_file(str(rel_path)):
-        return True
-    return False
+    return bool(policy.gitignore is not None and policy.gitignore.match_file(str(rel_path)))
 
 
 def truncate_output(text: str, max_chars: int = DEFAULT_MAX_CHARS) -> str:
@@ -135,9 +132,7 @@ def load_gitignore(cwd: Path) -> Any | None:
 
 def ensure_read_before_edit(state: ReadFileState, path: Path) -> str | None:
     if path not in state.entries:
-        return (
-            f"error: file has not been read yet. Read {path.name} first before editing."
-        )
+        return f"error: file has not been read yet. Read {path.name} first before editing."
     return None
 
 
@@ -151,10 +146,7 @@ def check_mtime_conflict(state: ReadFileState, path: Path) -> str | None:
     except OSError:
         return None
     if current_mtime_ns > read_mtime_ns:
-        return (
-            f"error: file was modified after read. "
-            f"Read {path.name} again before editing."
-        )
+        return f"error: file was modified after read. Read {path.name} again before editing."
     return None
 
 

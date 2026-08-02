@@ -18,11 +18,7 @@ def extract_links(file_path):
         clean_link = link.split("#")[0]
         if not clean_link:
             continue
-        if not (
-            clean_link.startswith("http://")
-            or clean_link.startswith("https://")
-            or clean_link.startswith("mailto:")
-        ):
+        if not (clean_link.startswith(("http://", "https://", "mailto:"))):
             relative_links.append((text, clean_link))
 
     return relative_links
@@ -41,9 +37,7 @@ def verify_file_links(file_path):
         target_path = os.path.abspath(os.path.join(base_dir, decoded_link))
 
         if not os.path.exists(target_path):
-            print(
-                f"  ❌ Broken link: '{text}' -> '{link}' (Resolved to: {target_path})"
-            )
+            print(f"  ❌ Broken link: '{text}' -> '{link}' (Resolved to: {target_path})")
             broken_links += 1
         else:
             print(f"  ✅ OK: '{text}' -> '{link}'")

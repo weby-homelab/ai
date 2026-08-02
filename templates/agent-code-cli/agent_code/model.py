@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import os
 import json
-import uuid
+import os
 import urllib.request
+import uuid
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -117,9 +117,7 @@ class AnthropicProvider:
 
 
 class OllamaProvider:
-    def __init__(
-        self, model: str = "gemma3:4b", base_url: str = "http://localhost:11434"
-    ) -> None:
+    def __init__(self, model: str = "gemma3:4b", base_url: str = "http://localhost:11434") -> None:
         self.model = model
         self.base_url = base_url
 
@@ -232,9 +230,7 @@ class OllamaProvider:
                 stop_reason="tool_use" if tool_calls else "end_turn",
             )
         except Exception as e:
-            raise RuntimeError(
-                f"Failed to communicate with Ollama: {e}. Is Ollama running?"
-            )
+            raise RuntimeError(f"Failed to communicate with Ollama: {e}. Is Ollama running?")
 
 
 class MockProvider:
@@ -247,14 +243,8 @@ class MockProvider:
         last = messages[-1]
         if last["role"] == "user":
             content = last["content"]
-            if (
-                isinstance(content, list)
-                and content
-                and content[0].get("type") == "tool_result"
-            ):
-                return ModelResponse(
-                    text=f"Дякую за виконання. Результат: {content[0]['content']}"
-                )
+            if isinstance(content, list) and content and content[0].get("type") == "tool_result":
+                return ModelResponse(text=f"Дякую за виконання. Результат: {content[0]['content']}")
 
             text = str(content)
             if "скажи привіт" in text.lower() or "say hi" in text.lower():
@@ -303,15 +293,11 @@ def _to_openai_tools(tools: list[Any]) -> list[dict[str, Any]]:
     ]
 
 
-def create_provider(
-    name: str, model: str, base_url: str | None = None
-) -> ModelProvider:
+def create_provider(name: str, model: str, base_url: str | None = None) -> ModelProvider:
     if name == "anthropic":
         return AnthropicProvider(model=model, base_url=base_url)
     if name == "ollama":
-        return OllamaProvider(
-            model=model, base_url=base_url or "http://localhost:11434"
-        )
+        return OllamaProvider(model=model, base_url=base_url or "http://localhost:11434")
     if name == "mock":
         return MockProvider()
     raise ValueError(f"Unknown provider name: {name}")

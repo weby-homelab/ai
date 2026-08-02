@@ -29,17 +29,17 @@
 
 from __future__ import annotations
 
-import os
 import logging
+import os
 from dataclasses import dataclass, field
 from typing import Literal
 
 from langchain_core.documents import Document
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_qdrant import QdrantVectorStore
-from langgraph.graph import StateGraph, END
+from langgraph.graph import END, StateGraph
 from pydantic import BaseModel, Field
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
@@ -48,9 +48,7 @@ from qdrant_client.models import Distance, VectorParams
 # 📋 Конфігурація (через змінні середовища або значення за замовчуванням)
 # =============================================================================
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -59,9 +57,7 @@ class AgentConfig:
     """Конфігурація агента. Всі параметри можна перевизначити через ENV."""
 
     # --- LLM ---
-    llm_model: str = field(
-        default_factory=lambda: os.getenv("AGENT_LLM_MODEL", "gemma3:4b")
-    )
+    llm_model: str = field(default_factory=lambda: os.getenv("AGENT_LLM_MODEL", "gemma3:4b"))
     llm_temperature: float = field(
         default_factory=lambda: float(os.getenv("AGENT_LLM_TEMPERATURE", "0.1"))
     )
@@ -92,9 +88,7 @@ class AgentConfig:
     max_rewrite_attempts: int = field(
         default_factory=lambda: int(os.getenv("AGENT_MAX_REWRITES", "2"))
     )
-    top_k_results: int = field(
-        default_factory=lambda: int(os.getenv("AGENT_TOP_K", "4"))
-    )
+    top_k_results: int = field(default_factory=lambda: int(os.getenv("AGENT_TOP_K", "4")))
 
 
 # =============================================================================
@@ -124,17 +118,13 @@ class AgentState(BaseModel):
 
     # Робочі дані
     rewritten_question: str = Field(default="", description="Переформульований запит")
-    documents: list[Document] = Field(
-        default_factory=list, description="Знайдені документи"
-    )
+    documents: list[Document] = Field(default_factory=list, description="Знайдені документи")
     relevant_documents: list[Document] = Field(
         default_factory=list, description="Документи, що пройшли фільтрацію"
     )
 
     # Лічильники
-    rewrite_count: int = Field(
-        default=0, description="Кількість спроб переформулювання"
-    )
+    rewrite_count: int = Field(default=0, description="Кількість спроб переформулювання")
 
     # Результат
     generation: str = Field(default="", description="Фінальна відповідь агента")
@@ -201,11 +191,13 @@ GRADING_PROMPT = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You are a document relevance grader for a Ukrainian AI knowledge base. "
-            "Evaluate if the document is relevant to the user's question. "
-            'Respond with ONLY a JSON object: {{"score": "relevant"}} or {{"score": "irrelevant"}}. '
-            "A document is relevant if it contains information that can help answer the question, "
-            "even partially.",
+            (
+                "You are a document relevance grader for a Ukrainian AI knowledge base. "
+                "Evaluate if the document is relevant to the user's question. "
+                'Respond with ONLY a JSON object: {{"score": "relevant"}} or {{"score": "irrelevant"}}. '
+                "A document is relevant if it contains information that can help answer the question, "
+                "even partially."
+            ),
         ),
         ("human", "Document:\n{document}\n\nQuestion: {question}"),
     ]
@@ -215,16 +207,20 @@ REWRITE_PROMPT = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You are a query rewriter for a Ukrainian AI knowledge base. "
-            "Rephrase the user's question to improve retrieval from a vector database. "
-            "Keep the semantic meaning but use different keywords and phrasing. "
-            "Respond with ONLY the rewritten question, nothing else.",
+            (
+                "You are a query rewriter for a Ukrainian AI knowledge base. "
+                "Rephrase the user's question to improve retrieval from a vector database. "
+                "Keep the semantic meaning but use different keywords and phrasing. "
+                "Respond with ONLY the rewritten question, nothing else."
+            ),
         ),
         (
             "human",
-            "Original question: {question}\n\n"
-            "This question returned no relevant results. "
-            "Rewrite it to improve search quality.",
+            (
+                "Original question: {question}\n\n"
+                "This question returned no relevant results. "
+                "Rewrite it to improve search quality."
+            ),
         ),
     ]
 )
@@ -233,11 +229,13 @@ GENERATION_PROMPT = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You are a helpful AI assistant for the AI-HomeLab project — "
-            "a Ukrainian initiative for building local AI laboratories. "
-            "Answer the user's question using ONLY the provided context. "
-            "If the context is insufficient, clearly state what information is missing. "
-            "Respond in the same language as the question (Ukrainian or English).",
+            (
+                "You are a helpful AI assistant for the AI-HomeLab project — "
+                "a Ukrainian initiative for building local AI laboratories. "
+                "Answer the user's question using ONLY the provided context. "
+                "If the context is insufficient, clearly state what information is missing. "
+                "Respond in the same language as the question (Ukrainian or English)."
+            ),
         ),
         ("human", "Context:\n{context}\n\n---\nQuestion: {question}"),
     ]
@@ -249,9 +247,7 @@ GENERATION_PROMPT = ChatPromptTemplate.from_messages(
 # =============================================================================
 
 
-def retrieve_node(
-    state: AgentState, config: AgentConfig, vector_store: QdrantVectorStore
-) -> dict:
+def retrieve_node(state: AgentState, config: AgentConfig, vector_store: QdrantVectorStore) -> dict:
     """
     🔍 Вузол RETRIEVE — пошук документів у Qdrant.
 
@@ -267,9 +263,7 @@ def retrieve_node(
     return {"documents": documents, "relevant_documents": []}
 
 
-def grade_documents_node(
-    state: AgentState, config: AgentConfig, llm: ChatOllama
-) -> dict:
+def grade_documents_node(state: AgentState, config: AgentConfig, llm: ChatOllama) -> dict:
     """
     📊 Вузол GRADE — оцінка релевантності кожного документа.
 
@@ -284,18 +278,14 @@ def grade_documents_node(
         try:
             result = grading_chain.invoke(
                 {
-                    "document": doc.page_content[
-                        :500
-                    ],  # Обмежуємо контекст для малих моделей
+                    "document": doc.page_content[:500],  # Обмежуємо контекст для малих моделей
                     "question": state.rewritten_question or state.question,
                 }
             )
 
             # Парсинг відповіді (з fallback для малих моделей)
             result_lower = result.lower().strip()
-            is_relevant = (
-                "relevant" in result_lower and "irrelevant" not in result_lower
-            )
+            is_relevant = "relevant" in result_lower and "irrelevant" not in result_lower
 
             if is_relevant:
                 relevant_docs.append(doc)
@@ -442,9 +432,7 @@ def build_graph(config: AgentConfig | None = None) -> StateGraph:
     # Вузли (з замиканням конфігурації)
     workflow.add_node("retrieve", lambda s: retrieve_node(s, config, vector_store))
     workflow.add_node("grade", lambda s: grade_documents_node(s, config, llm))
-    workflow.add_node(
-        "decide_passthrough", lambda s: s
-    )  # Прохідний вузол для розгалуження
+    workflow.add_node("decide_passthrough", lambda s: s)  # Прохідний вузол для розгалуження
     workflow.add_node("rewrite", lambda s: rewrite_node(s, llm))
     workflow.add_node("generate", lambda s: generate_node(s, llm))
     workflow.add_node("no_answer", lambda s: no_answer_node(s))
@@ -509,9 +497,7 @@ def ingest_documents(
     vector_store = build_vector_store(config)
     vector_store.add_documents(documents)
 
-    logger.info(
-        "📥 Завантажено %d документів у '%s'", len(documents), config.qdrant_collection
-    )
+    logger.info("📥 Завантажено %d документів у '%s'", len(documents), config.qdrant_collection)
     return len(documents)
 
 
