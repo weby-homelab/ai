@@ -20,9 +20,7 @@ def _sessions_dir(cwd: Path) -> Path:
 
 
 class Session:
-    def __init__(
-        self, cwd: Path, session_id: str, file_path: Path, resumed: bool = False
-    ) -> None:
+    def __init__(self, cwd: Path, session_id: str, file_path: Path, resumed: bool = False) -> None:
         self.cwd = cwd
         self.session_id = session_id
         self.file_path = file_path
@@ -77,6 +75,4 @@ class Session:
                     "content": msg["content"],
                     "timestamp": now,
                 }
-                f.write(
-                    json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n"
-                )
+                f.write(json.dumps(record, ensure_ascii=False, separators=(",", ":")) + "\n")

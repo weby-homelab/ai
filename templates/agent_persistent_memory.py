@@ -23,18 +23,17 @@
 Ліцензія: MIT
 """
 
-import os
-import sqlite3
 import json
 import logging
+import os
+import sqlite3
 from datetime import datetime
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 # Налаштування логування
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("AgentMemory")
 
 # =============================================================================
@@ -45,22 +44,16 @@ logger = logging.getLogger("AgentMemory")
 class MemoryItem(BaseModel):
     """Одиничний спогад агента."""
 
-    id: Optional[int] = Field(None, description="Унікальний ідентифікатор спогаду в БД")
-    category: str = Field(
-        ..., description="Категорія (напр., 'user_pref', 'codebase', 'decision')"
-    )
+    id: int | None = Field(None, description="Унікальний ідентифікатор спогаду в БД")
+    category: str = Field(..., description="Категорія (напр., 'user_pref', 'codebase', 'decision')")
     content: str = Field(..., description="Текстовий зміст спогаду")
-    importance: int = Field(
-        default=5, ge=1, le=10, description="Важливість спогаду від 1 до 10"
-    )
+    importance: int = Field(default=5, ge=1, le=10, description="Важливість спогаду від 1 до 10")
     timestamp: str = Field(
         default_factory=lambda: datetime.now().isoformat(),
         description="ISO мітка часу створення",
     )
-    metadata: Dict[str, Any] = Field(
-        default_factory=dict, description="Додаткові метадані"
-    )
-    embedding: Optional[List[float]] = Field(
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Додаткові метадані")
+    embedding: list[float] | None = Field(
         None, description="Векторне представлення (якщо увімкнено)"
     )
 
@@ -100,9 +93,7 @@ class AgentMemoryStore:
                 )
             """)
             # Створення індексу для швидкого пошуку за категоріями
-            cursor.execute(
-                "CREATE INDEX IF NOT EXISTS idx_category ON memories (category)"
-            )
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_category ON memories (category)")
             conn.commit()
 
     def _check_ollama(self):
@@ -125,7 +116,7 @@ class AgentMemoryStore:
                 self.ollama_url,
             )
 
-    def _get_embedding(self, text: str) -> Optional[List[float]]:
+    def _get_embedding(self, text: str) -> list[float] | None:
         """Отримання вектора через Ollama nomic-embed-text."""
         if not self.embeddings_enabled:
             return None
@@ -133,9 +124,7 @@ class AgentMemoryStore:
 
         try:
             payload = {"model": "nomic-embed-text", "prompt": text}
-            response = requests.post(
-                f"{self.ollama_url}/api/embeddings", json=payload, timeout=3
-            )
+            response = requests.post(f"{self.ollama_url}/api/embeddings", json=payload, timeout=3)
             if response.status_code == 200:
                 return response.json().get("embedding")
         except Exception as e:
@@ -147,7 +136,7 @@ class AgentMemoryStore:
         category: str,
         content: str,
         importance: int = 5,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> MemoryItem:
         """Додавання нового спогаду."""
         meta = metadata or {}
@@ -189,9 +178,11 @@ class AgentMemoryStore:
         )
         return item
 
-    def get_all_memories(self, category: Optional[str] = None) -> List[MemoryItem]:
+    def get_all_memories(self, category: str | None = None) -> list[MemoryItem]:
         """Отримання всіх спогадів (опціонально фільтрованих за категорією)."""
-        query = "SELECT id, category, content, importance, timestamp, metadata, embedding FROM memories"
+        query = (
+            "SELECT id, category, content, importance, timestamp, metadata, embedding FROM memories"
+        )
         params = []
         if category:
             query += " WHERE category = ?"
@@ -229,9 +220,7 @@ class AgentMemoryStore:
             logger.info("Deleted memory ID %s", memory_id)
         return deleted
 
-    def update_memory(
-        self, memory_id: int, content: str, importance: Optional[int] = None
-    ) -> bool:
+    def update_memory(self, memory_id: int, content: str, importance: int | None = None) -> bool:
         """Оновлення текстового змісту та вектора існуючого спогаду."""
         embedding = self._get_embedding(content)
         embedding_str = json.dumps(embedding) if embedding else None
@@ -256,9 +245,7 @@ class AgentMemoryStore:
             logger.info("Updated memory ID %s with new content", memory_id)
         return updated
 
-    def search_memories(
-        self, query_text: str, limit: int = 3
-    ) -> List[Tuple[MemoryItem, float]]:
+    def search_memories(self, query_text: str, limit: int = 3) -> list[tuple[MemoryItem, float]]:
         """
         Пошук релевантних спогадів.
         Якщо доступна Ollama, робить векторне порівняння (Cosine Similarity).
@@ -274,14 +261,10 @@ class AgentMemoryStore:
             for item in all_items:
                 if item.embedding:
                     # Розрахунок Cosine Similarity
-                    dot_product = sum(
-                        a * b for a, b in zip(query_vector, item.embedding)
-                    )
+                    dot_product = sum(a * b for a, b in zip(query_vector, item.embedding))
                     norm_a = sum(a * a for a in query_vector) ** 0.5
                     norm_b = sum(b * b for b in item.embedding) ** 0.5
-                    similarity = (
-                        dot_product / (norm_a * norm_b) if norm_a and norm_b else 0.0
-                    )
+                    similarity = dot_product / (norm_a * norm_b) if norm_a and norm_b else 0.0
                     scored_items.append((item, similarity))
 
             # Сортування за схожістю спадаюче
@@ -359,9 +342,7 @@ if __name__ == "__main__":
     print("\n📋 Список спогадів в базі даних:")
     all_memories = store.get_all_memories()
     for item in all_memories:
-        print(
-            f"  [{item.id}] Category: {item.category} (Importance: {item.importance})"
-        )
+        print(f"  [{item.id}] Category: {item.category} (Importance: {item.importance})")
         print(f"      Content: '{item.content}'")
         print(f"      Metadata: {item.metadata}")
         print("-" * 50)

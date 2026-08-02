@@ -87,13 +87,10 @@ def decide_permission(request: PermissionRequest) -> PermissionDecision:
         command = args.get("command", "")
         danger_reason = _is_dangerous(command)
         if danger_reason:
-            return PermissionDecision(
-                "deny", f"Dangerous command blocked: {danger_reason}"
-            )
+            return PermissionDecision("deny", f"Dangerous command blocked: {danger_reason}")
 
-    if mode == "acceptEdits":
-        if tool_name in ("file_write", "file_edit"):
-            return PermissionDecision("allow")
+    if mode == "acceptEdits" and tool_name in ("file_write", "file_edit"):
+        return PermissionDecision("allow")
 
     # Default behavior for writes and commands is to ask the user
     return PermissionDecision("ask")

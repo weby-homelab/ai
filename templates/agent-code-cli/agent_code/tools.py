@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import re
 import subprocess
-import urllib.request
 import urllib.parse
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -13,18 +13,18 @@ try:
 except ImportError:
     html2text = None
 
-from .model import ToolCall, ToolResult
 from .fs_safety import (
     ReadFileState,
     SkipPolicy,
+    apply_single_replace,
+    backup,
     ensure_text_file,
     ensure_within_size,
     resolve_in_cwd,
     should_skip,
     truncate_output,
-    backup,
-    apply_single_replace,
 )
+from .model import ToolCall, ToolResult
 
 
 @dataclass
@@ -163,10 +163,7 @@ def _grep_ripgrep(
 
     # relativize paths in output
     cwd_prefix = f"{ctx.cwd}/"
-    lines = [
-        line[len(cwd_prefix) :] if line.startswith(cwd_prefix) else line
-        for line in proc.stdout.splitlines()
-    ]
+    lines = [line.removeprefix(cwd_prefix) for line in proc.stdout.splitlines()]
     return truncate_output("\n".join(lines).strip() or "(no matches)")
 
 
@@ -281,9 +278,7 @@ def web_fetch(args: dict[str, Any], ctx: ToolContext) -> str:
         return "error: missing required argument 'url'"
 
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AI-HomeLabAgent/1.0"
-        }
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AI-HomeLabAgent/1.0"}
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=15) as res:
             charset = res.headers.get_content_charset() or "utf-8"
@@ -380,9 +375,7 @@ def file_edit(args: dict[str, Any], ctx: ToolContext) -> str:
         return f"error: {exc}"
 
     backup(ctx.cwd, path, content)
-    new_content, err = apply_single_replace(
-        content, old_string, new_string, replace_all
-    )
+    new_content, err = apply_single_replace(content, old_string, new_string, replace_all)
     if err:
         return err
 
@@ -430,9 +423,7 @@ def bash(args: dict[str, Any], ctx: ToolContext) -> str:
 
 
 def _ask_user_question(args: dict[str, Any], ctx: ToolContext) -> str:
-    return (
-        "error: ask_user_question must be handled by the harness, not executed directly"
-    )
+    return "error: ask_user_question must be handled by the harness, not executed directly"
 
 
 class ToolRegistry:
@@ -462,9 +453,7 @@ def default_tools() -> ToolRegistry:
     reg = ToolRegistry()
 
     # 1. system date
-    reg.register(
-        Tool("system_date", "Get the current system date and time.", {}, system_date)
-    )
+    reg.register(Tool("system_date", "Get the current system date and time.", {}, system_date))
 
     # 2. echo
     reg.register(
@@ -487,9 +476,7 @@ def default_tools() -> ToolRegistry:
             "Read complete contents of a text file inside the workspace.",
             {
                 "type": "object",
-                "properties": {
-                    "path": {"type": "string", "description": "Relative path to file"}
-                },
+                "properties": {"path": {"type": "string", "description": "Relative path to file"}},
                 "required": ["path"],
             },
             read_file,
@@ -647,9 +634,7 @@ def default_tools() -> ToolRegistry:
     )
 
     # 13. git status
-    reg.register(
-        Tool("git_status", "Run git status in the workspace.", {}, _git_status)
-    )
+    reg.register(Tool("git_status", "Run git status in the workspace.", {}, _git_status))
 
     # 14. git diff
     reg.register(Tool("git_diff", "Run git diff in the workspace.", {}, _git_diff))

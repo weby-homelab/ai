@@ -6,9 +6,9 @@ import typer
 from rich.console import Console
 
 from .agent import build_system_prompt, run_agent
-from .tools import default_tools
 from .model import create_provider
 from .session import Session
+from .tools import default_tools
 
 console = Console()
 app = typer.Typer(add_completion=False)
@@ -58,9 +58,7 @@ def run_once(
 
 @app.callback(invoke_without_command=True)
 def main_command(
-    prompt: str = typer.Argument(
-        "", help="Промпт для ШІ-агента. Якщо порожній, запускає REPL."
-    ),
+    prompt: str = typer.Argument("", help="Промпт для ШІ-агента. Якщо порожній, запускає REPL."),
     cwd: Path = typer.Option(Path.cwd(), "--cwd", "-C", help="Робоча директорія."),
     provider: str = typer.Option(
         "ollama", "--provider", help="Провайдер моделей: ollama, anthropic, mock."
@@ -78,9 +76,7 @@ def main_command(
         help="Режим доступу: default, acceptEdits, plan.",
     ),
     resume: str | None = typer.Option(None, "--resume", help="Відновити сесію за ID."),
-    continue_: bool = typer.Option(
-        False, "--continue", "-c", help="Продовжити останню сесію."
-    ),
+    continue_: bool = typer.Option(False, "--continue", "-c", help="Продовжити останню сесію."),
 ) -> None:
     resolved_cwd = cwd.resolve()
     session = None
@@ -125,9 +121,7 @@ def main_command(
 
     console.print(f"[green]Session ID: {session.session_id}[/green]")
     console.print("Введіть ваше запитання або інструкцію для кодування.")
-    console.print(
-        "Для виходу введіть [bold red]/exit[/bold red] або натисніть Ctrl+D.\n"
-    )
+    console.print("Для виходу введіть [bold red]/exit[/bold red] або натисніть Ctrl+D.\n")
 
     while True:
         try:
