@@ -27,7 +27,7 @@
 - [ ] **Локальний Deep Research агент на LangGraph / PydanticAI** із інтеграцією з SearXNG/DuckDuckGo та автоматичним генеративним синтезом звітів.
 - [ ] **Посібник та compose-конфіги для локальних MCP-серверів** (Filesystem, SQLite, Git, Fetch) та їх нативного використання в Cursor/Windsurf/Claude Code.
 - [ ] **Універсальний локальний AI-асистент (на базі OpenClaw / LangGraph)** з прямим безпечним доступом до інструментів (Bash, Browser, Filesystem) та ізоляцією в gVisor/Docker.
-- [ ] **Гібридна маршрутизація запитів (Hybrid Routing)**: Розумне балансування навантаження між локальними SLM (Gemma 4 12B/26B) для дешевих/приватних кроків та хмарними API (Claude 4.x Sonnet, GPT-5) для складних логічних висновків з урахуванням Prompt Caching.
+- [ ] **Гібридна маршрутизація запитів (Hybrid Routing)**: Розумне балансування навантаження між локальними SLM (Gemma 4 12B/26B) для дешевих/приватних кроків та хмарними API (Claude Sonnet 5, GPT-5.6 Sol) для складних логічних висновків з урахуванням Prompt Caching.
 - [ ] **Observability & Tracing**: Шаблони інтеграції локального стека з OpenTelemetry та сервісами трейсингу (Pydantic Logfire, Langfuse).
 - [ ] **Офлайн-база знань та RAG**: Docker-compose стек Kiwix + Wikipedia (.zim) із конфігурацією RAG-ембедінгів без доступу до інтернету.
 - [ ] **Конфігурація локальних IDE-інструментів (Continue.dev, Aider)** з використанням моделей Gemma 4 (12B/26B MoE) та MTP-драфтингу (Multi-Token Prediction) для прискорення генерації коду.

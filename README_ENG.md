@@ -52,7 +52,7 @@ We follow safety and development hygiene principles. Previously, a complete ban 
 | Category | Tools |
 |---|---|
 | **LLM Models** | Meta LLaMA 4 (Scout/Maverick), Google Gemma 4, Mistral (Large 3 / Medium 3.5 / Small 4), Microsoft Phi-4 (Reasoning/Vision/Multimodal), Qwen 3.6 (Dense/MoE)*, DeepSeek-V4 (Flash/Pro)* |
-| **Cloud APIs** | OpenAI (GPT-5.5/5.4, GPT-5.4 mini/nano), Anthropic (Claude 4.x / 4.6 / 4.5), Google (Gemini 3.5/3.1) |
+| **Cloud APIs** | OpenAI (GPT-5.6 Sol/Terra, GPT-5.5 / GPT-5, o3 / o4-mini), Anthropic (Claude Opus 5 / Sonnet 5 / Fable 5, Claude Opus 4.8 / 4.6), Google (Gemini 3.6 Flash / 3.5 Flash / 3.1 Pro) |
 | **Inference** | Ollama, vLLM, llama.cpp |
 | **Orchestration** | LangGraph, CrewAI, PydanticAI |
 
@@ -99,7 +99,7 @@ flowchart LR
 We create solutions adapted to **Ukrainian realities**. This means:
 
 - **Maximum results on consumer hardware** — RTX 3060/4060/5060 or Apple Silicon
-- **Use of free/cheap APIs** — Gemini 3.5 Flash / 3.1 Flash-Lite, GPT-5.4 mini for hybrid systems
+- **Use of free/cheap APIs** — Gemini 3.6 Flash / 3.5 Flash-Lite, GPT-5.6 Luna / o4-mini for hybrid systems
 - **Aggressive model quantization** — Q4/Q8 via GGUF to save VRAM
 - **🔋 Blackout Resilience** — optimizing power consumption for stable lab operation from inverters and power stations (EcoFlow, Bluetti) during power outages
 
@@ -123,7 +123,7 @@ A modern home AI lab functions as a three-tier architecture (Orchestration ↔ I
 flowchart TD
     ORCH["🏗️ Orchestration & Logic\n(LangGraph / CrewAI / PydanticAI)"]
     LOCAL["🧠 Local Inference\n(Ollama / vLLM / llama.cpp)"]
-    CLOUD["☁️ Cloud APIs\n(GPT-5.5 / Claude 4.6 / Gemini 3.5)"]
+    CLOUD["☁️ Cloud APIs\n(GPT-5.6 / Claude Opus 5 / Gemini 3.6)"]
     MCP["🔌 Model Context Protocol\n(MCP Servers)"]
     RES["📁 Sources & Tools\n(Files, DBs, Web APIs)"]
 
@@ -388,7 +388,7 @@ For convenience, all learning and practical materials in the repository are divi
 - [ ] **Local Deep Research agent on LangGraph / PydanticAI** with SearXNG/DuckDuckGo integration and automated generative report synthesis
 - [ ] **Guide and compose configs for local MCP servers** (Filesystem, SQLite, Git, Fetch) and their native usage in Cursor/Windsurf/Claude Code
 - [ ] **Universal local AI assistant (based on OpenClaw / LangGraph)** with direct secure tool access (Bash, Browser, Filesystem) and gVisor/Docker isolation
-- [ ] **Hybrid Routing**: Smart load balancing between local SLMs (Gemma 4 12B/26B) for cheap/private steps and cloud APIs (Claude 4.x Sonnet, GPT-5) for complex logical reasoning, leveraging Prompt Caching
+- [ ] **Hybrid Routing**: Smart load balancing between local SLMs (Gemma 4 12B/26B) for cheap/private steps and cloud APIs (Claude Sonnet 5, GPT-5.6 Sol) for complex logical reasoning, leveraging Prompt Caching
 - [ ] **Observability & Tracing**: Templates for integrating local stacks with OpenTelemetry and tracing services (Pydantic Logfire, Langfuse)
 - [ ] **Offline knowledge base and RAG**: Docker Compose stack for Kiwix + Wikipedia (.zim) with offline RAG embeddings configuration
 - [ ] **Configuration of local IDE tools (Continue.dev, Aider)** using Gemma 4 (12B/26B MoE) models and MTP (Multi-Token Prediction) drafting to speed up code generation

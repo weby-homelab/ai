@@ -84,7 +84,7 @@ A Google service that allows uploading up to 50 sources (PDFs, Markdown, links, 
 
 ### 3. Parallel Prompting
 Simultaneous testing of the exact same request across different model architectures to find the gold standard.
-- **Implementation:** For example, sending the query to Claude Sonnet 4.6 (for logic and coding), Gemini 3.1 Pro (for analyzing massive context), and GPT-5.4 (for structuring). This allows choosing the best phrasing or combining their strengths.
+- **Implementation:** For example, sending the query to Claude Sonnet 5 (for logic and coding), Gemini 3.6 Flash / 3.1 Pro (for analyzing massive context), and GPT-5.6 Sol (for structuring). This allows choosing the best phrasing or combining their strengths.
 
 ### 4. Voice-First Workflow
 A method for quickly capturing thoughts without using a keyboard.
@@ -118,9 +118,9 @@ Forces the model to correct its own coding or stylistic errors before you copy t
 ### 7. AI-to-AI Delegation
 Prompt chains where the output of one model becomes the instruction for another.
 - **Interaction diagram:**
-  1. **GPT-5.4 (Drafting):** Creates the initial concept or detailed prompt for the task.
-  2. **Claude Sonnet 4.6 (Implementation):** Performs the core work (writes clean code or text) based on the received prompt.
-  3. **Gemini 3.1 Pro (Review):** Analyzes the final result, verifies it using a massive context of knowledge, and makes final adjustments.
+  1. **GPT-5.6 Sol (Drafting):** Creates the initial concept or detailed prompt for the task.
+  2. **Claude Sonnet 5 (Implementation):** Performs the core work (writes clean code or text) based on the received prompt.
+  3. **Gemini 3.6 Flash / 3.1 Pro (Review):** Analyzes the final result, verifies it using a massive context of knowledge, and makes final adjustments.
 
 ---
 

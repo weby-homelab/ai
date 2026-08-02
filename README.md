@@ -52,7 +52,7 @@
 | Категорія | Інструменти |
 |---|---|
 | **LLM-моделі** | Meta LLaMA 4 (Scout/Maverick), Google Gemma 4, Mistral (Large 3 / Medium 3.5 / Small 4), Microsoft Phi-4 (Reasoning/Vision/Multimodal), Qwen 3.6 (Dense/MoE)*, DeepSeek-V4 (Flash/Pro)* |
-| **Хмарні API** | OpenAI (GPT-5.5/5.4, GPT-5.4 mini/nano), Anthropic (Claude 4.x / 4.6 / 4.5), Google (Gemini 3.5/3.1) |
+| **Хмарні API** | OpenAI (GPT-5.6 Sol/Terra, GPT-5.5 / GPT-5, o3 / o4-mini), Anthropic (Claude Opus 5 / Sonnet 5 / Fable 5, Claude Opus 4.8 / 4.6), Google (Gemini 3.6 Flash / 3.5 Flash / 3.1 Pro) |
 | **Інференс** | Ollama, vLLM, llama.cpp |
 | **Оркестрація** | LangGraph, CrewAI, PydanticAI |
 
@@ -99,7 +99,7 @@ flowchart LR
 Ми створюємо рішення, адаптовані до **українських реалій**. Це означає:
 
 - **Максимум результату на споживчому залізі** — RTX 3060/4060/5060 або Apple Silicon
-- **Використання безкоштовних/дешевих API** — Gemini 3.5 Flash / 3.1 Flash-Lite, GPT-5.4 mini для гібридних систем
+- **Використання безкоштовних/дешевих API** — Gemini 3.6 Flash / 3.5 Flash-Lite, GPT-5.6 Luna / o4-mini для гібридних систем
 - **Агресивна квантизація моделей** — Q4/Q8 через GGUF для економії VRAM
 - **🔋 Енергоавтономність (стійкість до відключень)** — оптимізація споживання для стабільної роботи лабораторії від інверторів та зарядних станцій (EcoFlow, Bluetti) під час знеструмлень
 
@@ -123,7 +123,7 @@ flowchart LR
 flowchart TD
     ORCH["🏗️ Оркестрація & Логіка\n(LangGraph / CrewAI / PydanticAI)"]
     LOCAL["🧠 Локальний Інференс\n(Ollama / vLLM / llama.cpp)"]
-    CLOUD["☁️ Хмарні API\n(GPT-5.5 / Claude 4.6 / Gemini 3.5)"]
+    CLOUD["☁️ Хмарні API\n(GPT-5.6 / Claude Opus 5 / Gemini 3.6)"]
     MCP["🔌 Model Context Protocol\n(MCP Servers)"]
     RES["📁 Джерела та Інструменти\n(Files, DBs, Web APIs)"]
 
@@ -390,7 +390,7 @@ flowchart TD
 * [ ] **Локальний Deep Research агент на LangGraph / PydanticAI** із інтеграцією з SearXNG/DuckDuckGo та автоматичним генеративним синтезом звітів
 * [ ] **Посібник та compose-конфіги для локальних MCP-серверів** (Filesystem, SQLite, Git, Fetch) та їх нативного використання в Cursor/Windsurf/Claude Code
 * [ ] **Універсальний локальний AI-асистент (на базі OpenClaw / LangGraph)** з прямим безпечним доступом до інструментів (Bash, Browser, Filesystem) та ізоляцією в gVisor/Docker
-* [ ] **Гібридна маршрутизація запитів (Hybrid Routing)**: Розумне балансування навантаження між локальними SLM (Gemma 4 12B/26B) для дешевих/приватних кроків та хмарними API (Claude 4.x Sonnet, GPT-5) для складних логічних висновків з урахуванням Prompt Caching
+* [ ] **Гібридна маршрутизація запитів (Hybrid Routing)**: Розумне балансування навантаження між локальними SLM (Gemma 4 12B/26B) для дешевих/приватних кроків та хмарними API (Claude Sonnet 5, GPT-5.6 Sol) для складних логічних висновків з урахуванням Prompt Caching
 * [ ] **Observability & Tracing**: Шаблони інтеграції локального стека з OpenTelemetry та сервісами трейсингу (Pydantic Logfire, Langfuse)
 * [ ] **Офлайн-база знань та RAG**: Docker-compose стек Kiwix + Wikipedia (.zim) із конфігурацією RAG-ембедінгів без доступу до інтернету
 * [ ] **Конфігурація локальних IDE-інструментів (Continue.dev, Aider)** з використанням моделей Gemma 4 (12B/26B MoE) та MTP-драфтингу (Multi-Token Prediction) для прискорення генерації коду
