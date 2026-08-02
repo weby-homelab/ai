@@ -148,7 +148,7 @@ flowchart TD
 
 ## ⚡ QUICK START
 
-As of **July 2026 (07.2026)**, you can deploy a local AI laboratory using two primary scenarios:
+As of **August 2026 (08.2026)**, you can deploy a local AI laboratory using two primary scenarios:
 
 ### Option A: Standard Stack (Ollama + Open WebUI) — Recommended for Beginners
 
@@ -192,11 +192,11 @@ The easiest path for laptops and home servers.
 This stack is deployed on our dedicated **WS workstation (IP: 100.68.179.109 / 192.168.2.24)** for maximum speed (MTP, Flash Attention, 128K context).
 
 1. **Start the compute core (Llama.cpp Server):**
-   Create a systemd service `/etc/systemd/system/llama-server.service` for automatic startup (configured for Xeon E5-2666 v3 + 11GB VRAM on RTX 2080 Ti using local reasoning model Ornith-1.0-35B-MTP):
+   Create a systemd service `/etc/systemd/system/llama-server.service` for automatic startup (configured for Xeon E5-2666 v3 + 11GB VRAM on RTX 2080 Ti using local reasoning model Qwen3.6-35B-A3B):
    ```bash
    # start_llama.sh
    /root/llama.cpp/build/bin/llama-server \
-       -m /root/llama-models/Ornith-1.0-35B-Q6_K-MTP.gguf \
+       -m /root/llama-models/Qwen3.6-35B-A3B-uncensored-heretic-Native-MTP-Preserved-Q4_K_M.gguf \
        -ngl 14 -t 10 -c 128000 -fa on -np 1 -b 512 -ub 512 \
        -ctk q8_0 -ctv q8_0 -fit off \
        --spec-type draft-mtp --spec-draft-n-max 2 \
@@ -207,7 +207,7 @@ This stack is deployed on our dedicated **WS workstation (IP: 100.68.179.109 / 1
    Bind the client to the local server with support for automatic fallback to the cloud and preserving thinking process:
    ```json
    {
-     "model": "local-infrastructure/ornith-1.0-35b-it",
+     "model": "local-infrastructure/qwen3.6-35b-a3b",
      "provider": {
        "local-infrastructure": {
          "npm": "@ai-sdk/openai-compatible",
@@ -217,8 +217,8 @@ This stack is deployed on our dedicated **WS workstation (IP: 100.68.179.109 / 1
            "apiKey": "sk-llama-cpp-local-token"
          },
          "models": {
-           "ornith-1.0-35b-it": {
-             "name": "Ornith-1.0 35B Local (MTP)",
+           "qwen3.6-35b-a3b": {
+             "name": "Qwen3.6 35B A3B Local (MTP)",
              "limit": { "context": 128000, "output": 4096 }
            }
          }
@@ -229,7 +229,7 @@ This stack is deployed on our dedicated **WS workstation (IP: 100.68.179.109 / 1
    ```
 3. **Start the client:**
    ```bash
-   opencode --model local-infrastructure/ornith-1.0-35b-it
+   opencode --model local-infrastructure/qwen3.6-35b-a3b
    ```
 
 #### 📊 Session Monitoring
@@ -368,7 +368,7 @@ For convenience, all learning and practical materials in the repository are divi
 ## 🗺️ ROADMAP
 
 > [!NOTE]
-> As of **June 16, 2026 (16.06.2026)**, Phase 1 (Foundation) has been fully completed ahead of schedule! The project is actively working on Phase 2. Hardware benchmarks have been successfully conducted on the WS workstation using the Gemma 4 26B (MoE) model.
+> As of **August 2026 (08.2026)**, Phase 1 (Foundation) has been fully completed ahead of schedule! The project is actively working on Phase 2. Hardware benchmarks have been successfully conducted on the WS workstation using Gemma 4 26B (MoE), Qwen 3.6 35B (MoE, MTP), and Ornith 1.0 35B (MoE, MTP) models.
 
 ### 🏁 Phase 1 — Foundation (Q3 2026) — 🎉 Completed ahead of schedule!
 
