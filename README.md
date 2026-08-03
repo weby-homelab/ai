@@ -26,15 +26,15 @@
 
 ## 📌 ЗМІСТ (TABLE OF CONTENTS)
 
-* [📜 Меморандум та Філософія Проєкту](#-меморандум-та-філософія-проєкту)
-* [⚡ Швидкий Старт (Quick Start)](#-швидкий-старт-quick-start)
-* [💻 Мінімальні Вимоги](#-мінімальні-вимоги)
-* [🛠️ Структура Репозиторію](#️-структура-репозиторію)
-* [📚 Модулі та Навігація](#-модулі-та-навігація)
-* [🗺️ Дорожня Карта (Roadmap)](#️-дорожня-карта-roadmap)
-* [🔐 Безпека](#-безпека)
-* [🤝 Приєднуйтесь до Спільноти](#-приєднуйтесь-до-спільноти)
-* [📄 Ліцензія](#-ліцензія)
+- [📜 Меморандум та Філософія Проєкту](#-меморандум-та-філософія-проєкту)
+- [⚡ Швидкий Старт (Quick Start)](#-швидкий-старт-quick-start)
+- [💻 Мінімальні Вимоги](#-мінімальні-вимоги)
+- [🛠️ Структура Репозиторію](#️-структура-репозиторію)
+- [📚 Модулі та Навігація](#-модулі-та-навігація)
+- [🗺️ Дорожня Карта (Roadmap)](#️-дорожня-карта-roadmap)
+- [🔐 Безпека](#-безпека)
+- [🤝 Приєднуйтесь до Спільноти](#-приєднуйтесь-до-спільноти)
+- [📄 Ліцензія](#-ліцензія)
 
 ---
 
@@ -49,14 +49,14 @@
 > [!CAUTION]
 > **Категорично заборонені моделі та інструменти:** YandexGPT, GigaChat, будь-які інші сервіси та моделі від компаній з країни-агресора РФ.
 
-| Категорія | Інструменти |
-|---|---|
-| **LLM-моделі** | Meta LLaMA 4 (Scout/Maverick), Google Gemma 4, Mistral (Large 3 / Medium 3.5 / Small 4), Microsoft Phi-4 (Reasoning/Vision/Multimodal), Qwen 3.6 (Dense/MoE)*, DeepSeek-V4 (Flash/Pro)* |
-| **Хмарні API** | OpenAI (GPT-5.6 Sol/Terra, GPT-5.5 / GPT-5, o3 / o4-mini), Anthropic (Claude Opus 5 / Sonnet 5 / Fable 5, Claude Opus 4.8 / 4.6), Google (Gemini 3.6 Flash / 3.5 Flash / 3.1 Pro) |
-| **Інференс** | Ollama, vLLM, llama.cpp |
-| **Оркестрація** | LangGraph, CrewAI, PydanticAI |
+| Категорія       | Інструменти                                                                                                                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LLM-моделі**  | Meta LLaMA 4 (Scout/Maverick), Google Gemma 4, Mistral (Large 3 / Medium 3.5 / Small 4), Microsoft Phi-4 (Reasoning/Vision/Multimodal), Qwen 3.6 (Dense/MoE)_, DeepSeek-V4 (Flash/Pro)_ |
+| **Хмарні API**  | OpenAI (GPT-5.6 Sol/Terra, GPT-5.5 / GPT-5, o3 / o4-mini), Anthropic (Claude Opus 5 / Sonnet 5 / Fable 5, Claude Opus 4.8 / 4.6), Google (Gemini 3.6 Flash / 3.5 Flash / 3.1 Pro)       |
+| **Інференс**    | Ollama, vLLM, llama.cpp                                                                                                                                                                 |
+| **Оркестрація** | LangGraph, CrewAI, PydanticAI                                                                                                                                                           |
 
-*\*Примітка: моделі з КНР (Qwen, DeepSeek) допускаються виключно для локального тестування, порівняння та підвищення продуктивності в агентному кодуванні згідно з Меморандумом.*
+_\*Примітка: моделі з КНР (Qwen, DeepSeek) допускаються виключно для локального тестування, порівняння та підвищення продуктивності в агентному кодуванні згідно з Меморандумом._
 
 ### 2. 🔒 Локальність та Суверенітет Даних
 
@@ -140,9 +140,9 @@ flowchart TD
     style RES fill:#d29922,stroke:#e3b341,color:#0d1117
 ```
 
-* **Шар оркестрації** керує логікою агентів, збереженням стану діалогів та суворою валідацією типів на рівні Python.
-* **Шар інференсу** виконує моделі локально або звертається до хмари, використовуючи сумісні API (OpenAI/Anthropic Messages API).
-* **Шар інструментів (MCP)** надає моделям стандартизований доступ до зовнішніх ресурсів без необхідності написання кастомних конекторів.
+- **Шар оркестрації** керує логікою агентів, збереженням стану діалогів та суворою валідацією типів на рівні Python.
+- **Шар інференсу** виконує моделі локально або звертається до хмари, використовуючи сумісні API (OpenAI/Anthropic Messages API).
+- **Шар інструментів (MCP)** надає моделям стандартизований доступ до зовнішніх ресурсів без необхідності написання кастомних конекторів.
 
 ---
 
@@ -233,9 +233,11 @@ flowchart TD
    ```
 
 #### 📊 Моніторинг сесій
+
 Для зручного моніторингу активних сесій OpenCode у реальному часі рекомендується використовувати термінальну утиліту [llmtop](https://github.com/weby-homelab/llmtop) (професійний інструмент моніторингу локальних LLM-сесій та ШІ-агентів, розроблений Weby Homelab):
-* Відображення заповнення контекстного вікна (`context_percent` та `context_window`) на основі вхідних та вихідних токенів.
-* Моніторинг активних сесій, процесів та лімітів.
+
+- Відображення заповнення контекстного вікна (`context_percent` та `context_window`) на основі вхідних та вихідних токенів.
+- Моніторинг активних сесій, процесів та лімітів.
 
 > [!IMPORTANT]
 > На Linux переконайтеся, що у вашій системі встановлено `sqlite3` (необхідний для зчитування бази даних сесій OpenCode).
@@ -247,14 +249,14 @@ flowchart TD
 
 ## 💻 МІНІМАЛЬНІ ВИМОГИ
 
-| Компонент | Мінімум | Рекомендовано | Преміум |
-|---|---|---|---|
-| **CPU** | 4 ядра (Intel i5/Ryzen 5) | 8 ядер (Intel i7/Ryzen 7) | Apple M2 Pro+ |
-| **RAM** | 8 GB | 16 GB | 32+ GB |
-| **GPU** | — (CPU-only) | RTX 3060 12GB | RTX 4060 Ti 16GB / RTX 5060 |
-| **Сховище** | 50 GB SSD | 256 GB NVMe | 1 TB NVMe |
-| **ОС** | Ubuntu 22.04+ / macOS 13+ | Ubuntu 24.04 / macOS 14+ | Proxmox VE 8+ |
-| **Енерго** | 220V розетка | UPS 600VA | EcoFlow + інвертор |
+| Компонент   | Мінімум                   | Рекомендовано             | Преміум                     |
+| ----------- | ------------------------- | ------------------------- | --------------------------- |
+| **CPU**     | 4 ядра (Intel i5/Ryzen 5) | 8 ядер (Intel i7/Ryzen 7) | Apple M2 Pro+               |
+| **RAM**     | 8 GB                      | 16 GB                     | 32+ GB                      |
+| **GPU**     | — (CPU-only)              | RTX 3060 12GB             | RTX 4060 Ti 16GB / RTX 5060 |
+| **Сховище** | 50 GB SSD                 | 256 GB NVMe               | 1 TB NVMe                   |
+| **ОС**      | Ubuntu 22.04+ / macOS 13+ | Ubuntu 24.04 / macOS 14+  | Proxmox VE 8+               |
+| **Енерго**  | 220V розетка              | UPS 600VA                 | EcoFlow + інвертор          |
 
 > [!IMPORTANT]
 > **Apple Silicon (M1/M2/M3/M4)** — ідеальний вибір для українських реалій: висока продуктивність при мінімальному енергоспоживанні (15-30W під навантаженням). Працює від будь-якого повербанку через USB-C.
@@ -264,57 +266,57 @@ flowchart TD
 ## 🛠️ СТРУКТУРА РЕПОЗИТОРІЮ
 
 📂 [**`ai/`**](https://github.com/weby-homelab/AI-HOMELAB/blob/main)<br>
-├── 📁 [**`benchmarks/`**](./benchmarks/) — *Бенчмарки заліза та енергоефективність*<br>
-│&nbsp;&nbsp;&nbsp;├── ⚡ [**`hardware_efficiency.md`**](./benchmarks/hardware_efficiency.md) — *GPU vs Apple Silicon (t/s/W)*<br>
-│&nbsp;&nbsp;&nbsp;└── 🚀 [**`large_moe_optimization.md`**](./benchmarks/large_moe_optimization.md) — *Оптимізація MoE моделей на WS (RTX 2080 Ti)*<br>
+├── 📁 [**`benchmarks/`**](./benchmarks/) — _Бенчмарки заліза та енергоефективність_<br>
+│&nbsp;&nbsp;&nbsp;├── ⚡ [**`hardware_efficiency.md`**](./benchmarks/hardware_efficiency.md) — _GPU vs Apple Silicon (t/s/W)_<br>
+│&nbsp;&nbsp;&nbsp;└── 🚀 [**`large_moe_optimization.md`**](./benchmarks/large_moe_optimization.md) — _Оптимізація MoE моделей на WS (RTX 2080 Ti)_<br>
 │<br>
-├── 📁 [**`configs/`**](./configs/) — *Готові Docker-compose конфігурації*<br>
-│&nbsp;&nbsp;&nbsp;├── ✅ [**`ollama/`**](./configs/ollama/) — *Ollama + Open WebUI в один клік*<br>
-│&nbsp;&nbsp;&nbsp;├── 🔌 [**`production-agent-stack/`**](./configs/production-agent-stack/) — *Комплексний стек (Ollama, LiteLLM, Qdrant, n8n, Open WebUI)*<br>
-│&nbsp;&nbsp;&nbsp;├── ⏳ **`vllm/`** — `(coming soon)` *vLLM для production-grade інференсу*<br>
-│&nbsp;&nbsp;&nbsp;├── ⏳ **`dify/`** — `(coming soon)` *Dify AI — no-code платформа оркестрації та RAG*<br>
-│&nbsp;&nbsp;&nbsp;├── ⏳ **`offline-knowledge/`** — `(coming soon)` *Стек Kiwix + Wikipedia для роботи офлайн*<br>
-│&nbsp;&nbsp;&nbsp;├── ⏳ **`mcp-stack/`** — `(coming soon)` *Стек локальних MCP-серверів (Filesystem, SQLite, Fetch)*<br>
-│&nbsp;&nbsp;&nbsp;└── ⏳ **`dashboard/`** — `(coming soon)` *Стартовий AI-HomeLab Dashboard*<br>
+├── 📁 [**`configs/`**](./configs/) — _Готові Docker-compose конфігурації_<br>
+│&nbsp;&nbsp;&nbsp;├── ✅ [**`ollama/`**](./configs/ollama/) — _Ollama + Open WebUI в один клік_<br>
+│&nbsp;&nbsp;&nbsp;├── 🔌 [**`production-agent-stack/`**](./configs/production-agent-stack/) — _Комплексний стек (Ollama, LiteLLM, Qdrant, n8n, Open WebUI)_<br>
+│&nbsp;&nbsp;&nbsp;├── ⏳ **`vllm/`** — `(coming soon)` _vLLM для production-grade інференсу_<br>
+│&nbsp;&nbsp;&nbsp;├── ⏳ **`dify/`** — `(coming soon)` _Dify AI — no-code платформа оркестрації та RAG_<br>
+│&nbsp;&nbsp;&nbsp;├── ⏳ **`offline-knowledge/`** — `(coming soon)` _Стек Kiwix + Wikipedia для роботи офлайн_<br>
+│&nbsp;&nbsp;&nbsp;├── ⏳ **`mcp-stack/`** — `(coming soon)` _Стек локальних MCP-серверів (Filesystem, SQLite, Fetch)_<br>
+│&nbsp;&nbsp;&nbsp;└── ⏳ **`dashboard/`** — `(coming soon)` _Стартовий AI-HomeLab Dashboard_<br>
 │<br>
-├── 📁 [**`templates/`**](./templates/) — *Шаблони та приклади коду*<br>
-│&nbsp;&nbsp;&nbsp;├── 🧠 [**`langgraph_rag_agent.py`**](./templates/langgraph_rag_agent.py) — *Corrective RAG Agent (LangGraph + Qdrant)*<br>
-│&nbsp;&nbsp;&nbsp;├── 🤖 [**`agent-code-cli/`**](./templates/agent-code-cli/) — *Claude Code Style Agent CLI (Ollama + Claude)*<br>
-│&nbsp;&nbsp;&nbsp;├── 💾 [**`agent_persistent_memory.py`**](./templates/agent_persistent_memory.py) — *Довготривала пам'ять агента (SQLite + Ollama)*<br>
-│&nbsp;&nbsp;&nbsp;├── ⏳ **`local_deep_research_agent.py`** — `(coming soon)` *Автономний дослідницький агент (SearXNG/DuckDuckGo)*<br>
-│&nbsp;&nbsp;&nbsp;├── ⏳ **`offline_wikipedia_rag.py`** — `(coming soon)` *RAG-пошук по локальних базах Kiwix (.zim)*<br>
-│&nbsp;&nbsp;&nbsp;└── 📦 [**`requirements.txt`**](./templates/requirements.txt) — *Залежності для запуску шаблонів "з коробки"*<br>
+├── 📁 [**`templates/`**](./templates/) — _Шаблони та приклади коду_<br>
+│&nbsp;&nbsp;&nbsp;├── 🧠 [**`langgraph_rag_agent.py`**](./templates/langgraph_rag_agent.py) — _Corrective RAG Agent (LangGraph + Qdrant)_<br>
+│&nbsp;&nbsp;&nbsp;├── 🤖 [**`agent-code-cli/`**](./templates/agent-code-cli/) — _Claude Code Style Agent CLI (Ollama + Claude)_<br>
+│&nbsp;&nbsp;&nbsp;├── 💾 [**`agent_persistent_memory.py`**](./templates/agent_persistent_memory.py) — _Довготривала пам'ять агента (SQLite + Ollama)_<br>
+│&nbsp;&nbsp;&nbsp;├── ⏳ **`local_deep_research_agent.py`** — `(coming soon)` _Автономний дослідницький агент (SearXNG/DuckDuckGo)_<br>
+│&nbsp;&nbsp;&nbsp;├── ⏳ **`offline_wikipedia_rag.py`** — `(coming soon)` _RAG-пошук по локальних базах Kiwix (.zim)_<br>
+│&nbsp;&nbsp;&nbsp;└── 📦 [**`requirements.txt`**](./templates/requirements.txt) — _Залежності для запуску шаблонів "з коробки"_<br>
 │<br>
-├── 📁 **`projects/`** — `(coming soon)` *Ідеї та реалізації пет-проєктів*<br>
-│&nbsp;&nbsp;&nbsp;├── ⏳ **`local-osint/`** — `(coming soon)` *Локальні OSINT-помічники*<br>
-│&nbsp;&nbsp;&nbsp;├── ⏳ **`biz-automation/`** — `(coming soon)` *Автоматизатори бізнес-рутини*<br>
-│&nbsp;&nbsp;&nbsp;└── ⏳ **`rag-pipeline/`** — `(coming soon)` *RAG-пайплайн по власним документам*<br>
+├── 📁 **`projects/`** — `(coming soon)` _Ідеї та реалізації пет-проєктів_<br>
+│&nbsp;&nbsp;&nbsp;├── ⏳ **`local-osint/`** — `(coming soon)` _Локальні OSINT-помічники_<br>
+│&nbsp;&nbsp;&nbsp;├── ⏳ **`biz-automation/`** — `(coming soon)` _Автоматизатори бізнес-рутини_<br>
+│&nbsp;&nbsp;&nbsp;└── ⏳ **`rag-pipeline/`** — `(coming soon)` _RAG-пайплайн по власним документам_<br>
 │<br>
-├── 📁 [**`docs/`**](./docs/) — *Документація та гайди*<br>
-│&nbsp;&nbsp;&nbsp;├── 📁 [**`research/`**](./docs/research/) — *Дослідження AI-ландшафту*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🔬 [**`ai-landscape-july-2026.md`**](./docs/research/ai-landscape-july-2026.md) — *Звіт по ШІ-моделях та стеку*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🔬 [**`nomad-odysseus-analysis.md`**](./docs/research/nomad-odysseus-analysis.md) — *Порівняльний аналіз проєктів N.O.M.A.D. та Odysseus*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🔬 [**`local-ai-experience-june-2026.md`**](./docs/research/local-ai-experience-june-2026.md) — *Практичний досвід з Odysseus, OpenCode та Gemma 4*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── 🚀 [**`free-ai-tools-lifehacks.md`**](./docs/research/free-ai-tools-lifehacks.md) — *Безкоштовні ШІ-інструменти та лайфхаки*<br>
-│&nbsp;&nbsp;&nbsp;├── 📁 [**`setup/`**](./docs/setup/) — *Крок-за-кроком для кожної ОС*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── ⏱️ [**`first-model-15-min.md`**](./docs/setup/first-model-15-min.md) — *Швидкий запуск першої моделі*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🔋 [**`blackout-guide.md`**](./docs/setup/blackout-guide.md) — *Гайд з енергоефективності під час блекаутів*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🏗️ [**`reference-architectures.md`**](./docs/setup/reference-architectures.md) — *Еталонні архітектури (Tier 1/2/3)*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── 📊 [**`ai-ops.md`**](./docs/setup/ai-ops.md) — *Метрики, моніторинг та обсервабільність (AI Ops)*<br>
-│&nbsp;&nbsp;&nbsp;├── 📁 [**`security/`**](./docs/security/) — *Політики, аудити та ізоляція моделей*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🛡️ [**`model_isolation.md`**](./docs/security/model_isolation.md) — *Ізоляція виконання та TEE*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🛡️ [**`advanced_hardening.md`**](./docs/security/advanced_hardening.md) — *Глибока ізоляція (VLAN, nftables, Gitleaks)*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🛡️ [**`model-vetting.md`**](./docs/security/model-vetting.md) — *Критерії перевірки моделей*<br>
-│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── 🛡️ [**`threat-modeling.md`**](./docs/security/threat-modeling.md) — *Моделювання загроз автономних агентів*<br>
-│&nbsp;&nbsp;&nbsp;├── 📄 [**`templates.md`**](./docs/templates.md) — *Посібник із використання кодових шаблонів*<br>
-│&nbsp;&nbsp;&nbsp;└── ✅ [**`quantization.md`**](./docs/setup/quantization.md) — *Гайд по квантизації (Q4/Q8/GGUF)*<br>
+├── 📁 [**`docs/`**](./docs/) — _Документація та гайди_<br>
+│&nbsp;&nbsp;&nbsp;├── 📁 [**`research/`**](./docs/research/) — _Дослідження AI-ландшафту_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🔬 [**`ai-landscape-july-2026.md`**](./docs/research/ai-landscape-july-2026.md) — _Звіт по ШІ-моделях та стеку_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🔬 [**`nomad-odysseus-analysis.md`**](./docs/research/nomad-odysseus-analysis.md) — _Порівняльний аналіз проєктів N.O.M.A.D. та Odysseus_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🔬 [**`local-ai-experience-june-2026.md`**](./docs/research/local-ai-experience-june-2026.md) — _Практичний досвід з Odysseus, OpenCode та Gemma 4_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── 🚀 [**`free-ai-tools-lifehacks.md`**](./docs/research/free-ai-tools-lifehacks.md) — _Безкоштовні ШІ-інструменти та лайфхаки_<br>
+│&nbsp;&nbsp;&nbsp;├── 📁 [**`setup/`**](./docs/setup/) — _Крок-за-кроком для кожної ОС_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── ⏱️ [**`first-model-15-min.md`**](./docs/setup/first-model-15-min.md) — _Швидкий запуск першої моделі_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🔋 [**`blackout-guide.md`**](./docs/setup/blackout-guide.md) — _Гайд з енергоефективності під час блекаутів_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🏗️ [**`reference-architectures.md`**](./docs/setup/reference-architectures.md) — _Еталонні архітектури (Tier 1/2/3)_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── 📊 [**`ai-ops.md`**](./docs/setup/ai-ops.md) — _Метрики, моніторинг та обсервабільність (AI Ops)_<br>
+│&nbsp;&nbsp;&nbsp;├── 📁 [**`security/`**](./docs/security/) — _Політики, аудити та ізоляція моделей_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🛡️ [**`model_isolation.md`**](./docs/security/model_isolation.md) — _Ізоляція виконання та TEE_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🛡️ [**`advanced_hardening.md`**](./docs/security/advanced_hardening.md) — _Глибока ізоляція (VLAN, nftables, Gitleaks)_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── 🛡️ [**`model-vetting.md`**](./docs/security/model-vetting.md) — _Критерії перевірки моделей_<br>
+│&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── 🛡️ [**`threat-modeling.md`**](./docs/security/threat-modeling.md) — _Моделювання загроз автономних агентів_<br>
+│&nbsp;&nbsp;&nbsp;├── 📄 [**`templates.md`**](./docs/templates.md) — _Посібник із використання кодових шаблонів_<br>
+│&nbsp;&nbsp;&nbsp;└── ✅ [**`quantization.md`**](./docs/setup/quantization.md) — _Гайд по квантизації (Q4/Q8/GGUF)_<br>
 │<br>
-├── 📄 [**`README.md`**](./README.md) — *Цей файл (UA)*<br>
-├── 📄 [**`README_ENG.md`**](./README_ENG.md) — *English version*<br>
-├── 📄 [**`CONTRIBUTING.md`**](./CONTRIBUTING.md) — *Гайд для контриб'юторів*<br>
-├── 📄 [**`SECURITY.md`**](./SECURITY.md) — *Політики безпеки*<br>
-├── 📄 [**`LICENSE`**](./LICENSE) — *MIT ліцензія*<br>
-└── 📄 [**`ROADMAP.md`**](./ROADMAP.md) — *Дорожня карта проєкту*
+├── 📄 [**`README.md`**](./README.md) — _Цей файл (UA)_<br>
+├── 📄 [**`README_ENG.md`**](./README_ENG.md) — _English version_<br>
+├── 📄 [**`CONTRIBUTING.md`**](./CONTRIBUTING.md) — _Гайд для контриб'юторів_<br>
+├── 📄 [**`SECURITY.md`**](./SECURITY.md) — _Політики безпеки_<br>
+├── 📄 [**`LICENSE`**](./LICENSE) — _MIT ліцензія_<br>
+└── 📄 [**`ROADMAP.md`**](./ROADMAP.md) — _Дорожня карта проєкту_
 
 ---
 
@@ -323,47 +325,52 @@ flowchart TD
 Для зручності всі навчальні та практичні матеріали репозиторію розділені на тематичні блоки:
 
 ### 🚀 1. Швидкий Старт та Базова Інфраструктура
-| Модуль та Посилання | Опис | Головні Файли | Статус |
-| :--- | :--- | :--- | :--- |
-| ⏱️ [**15-Min Setup**](./docs/setup/first-model-15-min.md) | Швидкий покроковий запуск Ollama, завантаження першої моделі та чат через Docker-контейнер Open WebUI. | [`first-model-15-min.md`](./docs/setup/first-model-15-min.md) | ✅ Готово |
-| 🐳 [**Ollama + Open WebUI**](./configs/ollama/) | Конфігурація Docker Compose для спільного запуску сервісів (CPU/GPU профілі, безпечна прив'язка портів). | [`docker-compose.yml`](./configs/ollama/docker-compose.yml) | ✅ Готово |
-| 🏗️ [**Reference Architectures**](./docs/setup/reference-architectures.md) | Еталонні апаратні конфігурації (Tier 1/2/3) для розгортання домашніх AI-лабораторій від $300 до $3000+. | [`reference-architectures.md`](./docs/setup/reference-architectures.md) | ✅ Готово |
-| 🔌 [**Production Agent Stack**](./configs/production-agent-stack/) | Конфігурація повного інфраструктурного стеку (Ollama, LiteLLM, Qdrant, n8n, Open WebUI) для мультиагентних систем. | [`docker-compose.yml`](./configs/production-agent-stack/docker-compose.yml) | ✅ Готово |
-| 🚀 [**Free AI Tools & Hacks**](./docs/research/free-ai-tools-lifehacks.md) | Перелік безкоштовних інструментів розробки та 7 лайфхаків для покращення якості відповідей. | [`free-ai-tools-lifehacks.md`](./docs/research/free-ai-tools-lifehacks.md) | ✅ Готово |
+
+| Модуль та Посилання                                                        | Опис                                                                                                               | Головні Файли                                                               | Статус    |
+| :------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- | :-------- |
+| ⏱️ [**15-Min Setup**](./docs/setup/first-model-15-min.md)                  | Швидкий покроковий запуск Ollama, завантаження першої моделі та чат через Docker-контейнер Open WebUI.             | [`first-model-15-min.md`](./docs/setup/first-model-15-min.md)               | ✅ Готово |
+| 🐳 [**Ollama + Open WebUI**](./configs/ollama/)                            | Конфігурація Docker Compose для спільного запуску сервісів (CPU/GPU профілі, безпечна прив'язка портів).           | [`docker-compose.yml`](./configs/ollama/docker-compose.yml)                 | ✅ Готово |
+| 🏗️ [**Reference Architectures**](./docs/setup/reference-architectures.md)  | Еталонні апаратні конфігурації (Tier 1/2/3) для розгортання домашніх AI-лабораторій від $300 до $3000+.            | [`reference-architectures.md`](./docs/setup/reference-architectures.md)     | ✅ Готово |
+| 🔌 [**Production Agent Stack**](./configs/production-agent-stack/)         | Конфігурація повного інфраструктурного стеку (Ollama, LiteLLM, Qdrant, n8n, Open WebUI) для мультиагентних систем. | [`docker-compose.yml`](./configs/production-agent-stack/docker-compose.yml) | ✅ Готово |
+| 🚀 [**Free AI Tools & Hacks**](./docs/research/free-ai-tools-lifehacks.md) | Перелік безкоштовних інструментів розробки та 7 лайфхаків для покращення якості відповідей.                        | [`free-ai-tools-lifehacks.md`](./docs/research/free-ai-tools-lifehacks.md)  | ✅ Готово |
 
 ### 🧠 2. Розробка, Шаблони та Агенти
-| Модуль та Посилання | Опис | Головні Файли | Статус |
-| :--- | :--- | :--- | :--- |
-| 🤖 [**Agent CLI**](./templates/agent-code-cli/) | Консольний ШІ-агент у Claude Code стилі (безпечна робоча директорія, виконання bash з вашого дозволу, інтерактивний diff-перегляд). | [`cli.py`](./templates/agent-code-cli/agent_code/cli.py) | ✅ Готово |
-| 🧠 [**CRAG Agent**](./templates/langgraph_rag_agent.py) | Corrective RAG (CRAG) агент на LangGraph + Qdrant із циклічним графом оцінки та переформулювання запитів. | [`langgraph_rag_agent.py`](./templates/langgraph_rag_agent.py) | ✅ Готово |
-| 🧠 [**Agent Memory**](./templates/agent_persistent_memory.py) | Шаблон довготривалої сесійної пам'яті (SQLite + Ollama nomic-embed-text) для збереження фактів та рішень між сесіями. | [`agent_persistent_memory.py`](./templates/agent_persistent_memory.py) | ✅ Готово |
-| 📄 [**Templates Guide**](./docs/templates.md) | Загальний покроковий посібник із налаштування та запуску всіх кодових шаблонів репозиторію. | [`templates.md`](./docs/templates.md) | ✅ Готово |
+
+| Модуль та Посилання                                           | Опис                                                                                                                                | Головні Файли                                                          | Статус    |
+| :------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :-------- |
+| 🤖 [**Agent CLI**](./templates/agent-code-cli/)               | Консольний ШІ-агент у Claude Code стилі (безпечна робоча директорія, виконання bash з вашого дозволу, інтерактивний diff-перегляд). | [`cli.py`](./templates/agent-code-cli/agent_code/cli.py)               | ✅ Готово |
+| 🧠 [**CRAG Agent**](./templates/langgraph_rag_agent.py)       | Corrective RAG (CRAG) агент на LangGraph + Qdrant із циклічним графом оцінки та переформулювання запитів.                           | [`langgraph_rag_agent.py`](./templates/langgraph_rag_agent.py)         | ✅ Готово |
+| 🧠 [**Agent Memory**](./templates/agent_persistent_memory.py) | Шаблон довготривалої сесійної пам'яті (SQLite + Ollama nomic-embed-text) для збереження фактів та рішень між сесіями.               | [`agent_persistent_memory.py`](./templates/agent_persistent_memory.py) | ✅ Готово |
+| 📄 [**Templates Guide**](./docs/templates.md)                 | Загальний покроковий посібник із налаштування та запуску всіх кодових шаблонів репозиторію.                                         | [`templates.md`](./docs/templates.md)                                  | ✅ Готово |
 
 ### ⚡ 3. Апаратне Забезпечення та Енергоефективність
-| Модуль та Посилання | Опис | Головні Файли | Статус |
-| :--- | :--- | :--- | :--- |
-| 🔋 [**Blackout Guide**](./docs/setup/blackout-guide.md) | Налаштування лаби для роботи під час відключень світла (Nvidia Power Limit, обмеження потоків CPU, робота від EcoFlow, Starlink 12V PoE, Tailscale, Offline RAG). | [`blackout-guide.md`](./docs/setup/blackout-guide.md) | ✅ Готово |
-| ⚡ [**Hardware Benchmarks**](./benchmarks/hardware_efficiency.md) | Детальний аналіз GPU vs Apple Silicon (tokens/second/Watt), аналіз холодного старту та VRAM contention. | [`hardware_efficiency.md`](./benchmarks/hardware_efficiency.md) | ✅ Готово |
-| 🚀 [**MoE Optimization**](./benchmarks/large_moe_optimization.md) | Оптимізація та порівняльний бенчмарк великих MoE моделей (Gemma 4 26B, Qwen 3.6 35B, Ornith 1.0 35B) на робочій станції WS. | [`large_moe_optimization.md`](./benchmarks/large_moe_optimization.md) | ✅ Готово |
-| 📊 [**AI Ops & Observability**](./docs/setup/ai-ops.md) | Моніторинг апаратного забезпечення (GPU Power Draw), метрик інференсу (Ollama/vLLM /metrics) та трейсинг агентів через Langfuse. | [`ai-ops.md`](./docs/setup/ai-ops.md) | ✅ Готово |
-| 📦 [**Quantization Guide**](./docs/setup/quantization.md) | Посібник з квантизації моделей: вибір форматів (Q4/Q8/GGUF), розрахунок VRAM, квантування через `llama.cpp` та інтеграція в Ollama. | [`quantization.md`](./docs/setup/quantization.md) | ✅ Готово |
+
+| Модуль та Посилання                                               | Опис                                                                                                                                                              | Головні Файли                                                         | Статус    |
+| :---------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- | :-------- |
+| 🔋 [**Blackout Guide**](./docs/setup/blackout-guide.md)           | Налаштування лаби для роботи під час відключень світла (Nvidia Power Limit, обмеження потоків CPU, робота від EcoFlow, Starlink 12V PoE, Tailscale, Offline RAG). | [`blackout-guide.md`](./docs/setup/blackout-guide.md)                 | ✅ Готово |
+| ⚡ [**Hardware Benchmarks**](./benchmarks/hardware_efficiency.md) | Детальний аналіз GPU vs Apple Silicon (tokens/second/Watt), аналіз холодного старту та VRAM contention.                                                           | [`hardware_efficiency.md`](./benchmarks/hardware_efficiency.md)       | ✅ Готово |
+| 🚀 [**MoE Optimization**](./benchmarks/large_moe_optimization.md) | Оптимізація та порівняльний бенчмарк великих MoE моделей (Gemma 4 26B, Qwen 3.6 35B, Ornith 1.0 35B) на робочій станції WS.                                       | [`large_moe_optimization.md`](./benchmarks/large_moe_optimization.md) | ✅ Готово |
+| 📊 [**AI Ops & Observability**](./docs/setup/ai-ops.md)           | Моніторинг апаратного забезпечення (GPU Power Draw), метрик інференсу (Ollama/vLLM /metrics) та трейсинг агентів через Langfuse.                                  | [`ai-ops.md`](./docs/setup/ai-ops.md)                                 | ✅ Готово |
+| 📦 [**Quantization Guide**](./docs/setup/quantization.md)         | Посібник з квантизації моделей: вибір форматів (Q4/Q8/GGUF), розрахунок VRAM, квантування через `llama.cpp` та інтеграція в Ollama.                               | [`quantization.md`](./docs/setup/quantization.md)                     | ✅ Готово |
 
 ### 🛡️ 4. Безпека, Харденінг та Ізоляція Моделей
-| Модуль та Посилання | Опис | Головні Файли | Статус |
-| :--- | :--- | :--- | :--- |
-| 🛡️ [**Advanced Hardening**](./docs/security/advanced_hardening.md) | VLAN-ізоляція IoT-сегменту, nftables фаєрвол для хоста Proxmox, безпека Docker daemon та Gitleaks pre-commit лінтер. | [`advanced_hardening.md`](./docs/security/advanced_hardening.md) | ✅ Готово |
-| 🛡️ [**Model Isolation**](./docs/security/model_isolation.md) | Ізоляція виконання моделей: пісочниці gVisor, Firecracker, WASM, довірені середовища виконання (TEE) та Zero-Trust. | [`model_isolation.md`](./docs/security/model_isolation.md) | ✅ Готово |
-| 🛡️ [**Model Vetting**](./docs/security/model-vetting.md) | Критерії перевірки моделей (модельна гігієна, приватність інференсу, безпечні формати GGUF/Safetensors та ліцензування). | [`model-vetting.md`](./docs/security/model-vetting.md) | ✅ Готово |
-| 🛡️ [**Threat Modeling**](./docs/security/threat-modeling.md) | Моделювання загроз для автономних агентів (Prompt Injection, Tool Poisoning, Agent Escape, Secrets Leakage). | [`threat-modeling.md`](./docs/security/threat-modeling.md) | ✅ Готово |
-| 🔐 [**Security Policy**](./SECURITY.md) | Загальні політики безпеки проєкту, модельна гігієна, ізоляція чутливих даних та управління секретами. | [`SECURITY.md`](./SECURITY.md) | ✅ Готово |
+
+| Модуль та Посилання                                                | Опис                                                                                                                     | Головні Файли                                                    | Статус    |
+| :----------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------- | :-------- |
+| 🛡️ [**Advanced Hardening**](./docs/security/advanced_hardening.md) | VLAN-ізоляція IoT-сегменту, nftables фаєрвол для хоста Proxmox, безпека Docker daemon та Gitleaks pre-commit лінтер.     | [`advanced_hardening.md`](./docs/security/advanced_hardening.md) | ✅ Готово |
+| 🛡️ [**Model Isolation**](./docs/security/model_isolation.md)       | Ізоляція виконання моделей: пісочниці gVisor, Firecracker, WASM, довірені середовища виконання (TEE) та Zero-Trust.      | [`model_isolation.md`](./docs/security/model_isolation.md)       | ✅ Готово |
+| 🛡️ [**Model Vetting**](./docs/security/model-vetting.md)           | Критерії перевірки моделей (модельна гігієна, приватність інференсу, безпечні формати GGUF/Safetensors та ліцензування). | [`model-vetting.md`](./docs/security/model-vetting.md)           | ✅ Готово |
+| 🛡️ [**Threat Modeling**](./docs/security/threat-modeling.md)       | Моделювання загроз для автономних агентів (Prompt Injection, Tool Poisoning, Agent Escape, Secrets Leakage).             | [`threat-modeling.md`](./docs/security/threat-modeling.md)       | ✅ Готово |
+| 🔐 [**Security Policy**](./SECURITY.md)                            | Загальні політики безпеки проєкту, модельна гігієна, ізоляція чутливих даних та управління секретами.                    | [`SECURITY.md`](./SECURITY.md)                                   | ✅ Готово |
 
 ### 🔬 5. Стратегія, Дорожня Карта та Спільнота
-| Модуль та Посилання | Опис | Головні Файли | Статус |
-| :--- | :--- | :--- | :--- |
-| 🔬 [**AI Landscape 2026**](./docs/research/ai-landscape-july-2026.md) | Аналіз ринку ШІ станом на липень 2026 року: моделі, API, фреймворки, RAG, MCP, а також stealth-браузери та асистенти. | [`ai-landscape-july-2026.md`](./docs/research/ai-landscape-july-2026.md) | ✅ Готово |
-| 🔬 [**Local AI Experience**](./docs/research/local-ai-experience-june-2026.md) | Практичний досвід налаштування та роботи з Odysseus UI, OpenCode TUI та моделями Gemma 4 MoE. | [`local-ai-experience-june-2026.md`](./docs/research/local-ai-experience-june-2026.md) | ✅ Готово |
-| 🗺️ [**Roadmap**](./ROADMAP.md) | Детальний план розвитку проєкту: Фаза 1 (Фундамент), Фаза 2 (Практика), Фаза 3 (Спільнота). | [`ROADMAP.md`](./ROADMAP.md) | ✅ Готово |
-| 🤝 [**Contributing**](./CONTRIBUTING.md) | Гайд для контриб'юторів: як створювати Issues, розробляти у гілках та оформлювати Pull Requests. | [`CONTRIBUTING.md`](./CONTRIBUTING.md) | ✅ Готово |
+
+| Модуль та Посилання                                                            | Опис                                                                                                                  | Головні Файли                                                                          | Статус    |
+| :----------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------- | :-------- |
+| 🔬 [**AI Landscape 2026**](./docs/research/ai-landscape-july-2026.md)          | Аналіз ринку ШІ станом на липень 2026 року: моделі, API, фреймворки, RAG, MCP, а також stealth-браузери та асистенти. | [`ai-landscape-july-2026.md`](./docs/research/ai-landscape-july-2026.md)               | ✅ Готово |
+| 🔬 [**Local AI Experience**](./docs/research/local-ai-experience-june-2026.md) | Практичний досвід налаштування та роботи з Odysseus UI, OpenCode TUI та моделями Gemma 4 MoE.                         | [`local-ai-experience-june-2026.md`](./docs/research/local-ai-experience-june-2026.md) | ✅ Готово |
+| 🗺️ [**Roadmap**](./ROADMAP.md)                                                 | Детальний план розвитку проєкту: Фаза 1 (Фундамент), Фаза 2 (Практика), Фаза 3 (Спільнота).                           | [`ROADMAP.md`](./ROADMAP.md)                                                           | ✅ Готово |
+| 🤝 [**Contributing**](./CONTRIBUTING.md)                                       | Гайд для контриб'юторів: як створювати Issues, розробляти у гілках та оформлювати Pull Requests.                      | [`CONTRIBUTING.md`](./CONTRIBUTING.md)                                                 | ✅ Готово |
 
 ---
 
@@ -374,41 +381,41 @@ flowchart TD
 
 ### 🏁 Фаза 1 — Фундамент (Q3 2026) — 🎉 Виконано достроково!
 
-* [x] Меморандум та філософія проєкту
-* [x] Docker-compose для Ollama + Open WebUI
-* [x]  Бенчмарки RTX 3060/4060/5060 з квантизованими моделями
-* [x] Гайд: "Перша модель за 15 хвилин"
-* [x] Шаблон RAG-пайплайну на LangGraph (CRAG Agent)
-* [x] Глибока ізоляція домашньої лаби (Advanced Hardening)
-* [x]  Бенчмарки енергоефективності (t/s/W)
-* [x] Консольний ШІ-агент для кодування (Claude Code style CLI)
+- [x] Меморандум та філософія проєкту
+- [x] Docker-compose для Ollama + Open WebUI
+- [x] Бенчмарки RTX 3060/4060/5060 з квантизованими моделями
+- [x] Гайд: "Перша модель за 15 хвилин"
+- [x] Шаблон RAG-пайплайну на LangGraph (CRAG Agent)
+- [x] Глибока ізоляція домашньої лаби (Advanced Hardening)
+- [x] Бенчмарки енергоефективності (t/s/W)
+- [x] Консольний ШІ-агент для кодування (Claude Code style CLI)
 
 ### 🚀 Фаза 2 — Практика (Q4 2026) — ⏳ У процесі розробки
 
-* [ ] **Мультиагентний шаблон на LangGraph / PydanticAI** для бізнес-автоматизації (Stateful workflows з human-in-the-loop та durable checkpointing у PostgreSQL/SQLite)
-* [x] Блекаут-гайд: налаштування лаби для роботи від EcoFlow, Starlink 12V PoE, Tailscale, Offline RAG
-* [ ] **Локальний Deep Research агент на LangGraph / PydanticAI** із інтеграцією з SearXNG/DuckDuckGo та автоматичним генеративним синтезом звітів
-* [ ] **Посібник та compose-конфіги для локальних MCP-серверів** (Filesystem, SQLite, Git, Fetch) та їх нативного використання в Cursor/Windsurf/Claude Code
-* [ ] **Універсальний локальний AI-асистент (на базі OpenClaw / LangGraph)** з прямим безпечним доступом до інструментів (Bash, Browser, Filesystem) та ізоляцією в gVisor/Docker
-* [ ] **Гібридна маршрутизація запитів (Hybrid Routing)**: Розумне балансування навантаження між локальними SLM (Gemma 4 12B/26B) для дешевих/приватних кроків та хмарними API (Claude Sonnet 5, GPT-5.6 Sol) для складних логічних висновків з урахуванням Prompt Caching
-* [ ] **Observability & Tracing**: Шаблони інтеграції локального стека з OpenTelemetry та сервісами трейсингу (Pydantic Logfire, Langfuse)
-* [ ] **Офлайн-база знань та RAG**: Docker-compose стек Kiwix + Wikipedia (.zim) із конфігурацією RAG-ембедінгів без доступу до інтернету
-* [ ] **Конфігурація локальних IDE-інструментів (Continue.dev, Aider)** з використанням моделей Gemma 4 (12B/26B MoE) та MTP-драфтингу (Multi-Token Prediction) для прискорення генерації коду
-* [x] Інтеграція сесійної пам'яті (AgentMemory) у шаблони агента
-* [x] Еталонні архітектури обладнання (Tier 1/2/3) для локального ШІ
-* [x] Комплексний Docker-compose стек (Ollama, LiteLLM, Qdrant, n8n, Open WebUI) для мультиагентних систем
-* [x] Моделювання загроз автономних ШІ-агентів (Threat Modeling)
-* [x] Налаштування збору апаратних метрик та трейсингу запитів (AIOps & Observability)
+- [ ] **Мультиагентний шаблон на LangGraph / PydanticAI** для бізнес-автоматизації (Stateful workflows з human-in-the-loop та durable checkpointing у PostgreSQL/SQLite)
+- [x] Блекаут-гайд: налаштування лаби для роботи від EcoFlow, Starlink 12V PoE, Tailscale, Offline RAG
+- [ ] **Локальний Deep Research агент на LangGraph / PydanticAI** із інтеграцією з SearXNG/DuckDuckGo та автоматичним генеративним синтезом звітів
+- [ ] **Посібник та compose-конфіги для локальних MCP-серверів** (Filesystem, SQLite, Git, Fetch) та їх нативного використання в Cursor/Windsurf/Claude Code
+- [ ] **Універсальний локальний AI-асистент (на базі OpenClaw / LangGraph)** з прямим безпечним доступом до інструментів (Bash, Browser, Filesystem) та ізоляцією в gVisor/Docker
+- [ ] **Гібридна маршрутизація запитів (Hybrid Routing)**: Розумне балансування навантаження між локальними SLM (Gemma 4 12B/26B) для дешевих/приватних кроків та хмарними API (Claude Sonnet 5, GPT-5.6 Sol) для складних логічних висновків з урахуванням Prompt Caching
+- [ ] **Observability & Tracing**: Шаблони інтеграції локального стека з OpenTelemetry та сервісами трейсингу (Pydantic Logfire, Langfuse)
+- [ ] **Офлайн-база знань та RAG**: Docker-compose стек Kiwix + Wikipedia (.zim) із конфігурацією RAG-ембедінгів без доступу до інтернету
+- [ ] **Конфігурація локальних IDE-інструментів (Continue.dev, Aider)** з використанням моделей Gemma 4 (12B/26B MoE) та MTP-драфтингу (Multi-Token Prediction) для прискорення генерації коду
+- [x] Інтеграція сесійної пам'яті (AgentMemory) у шаблони агента
+- [x] Еталонні архітектури обладнання (Tier 1/2/3) для локального ШІ
+- [x] Комплексний Docker-compose стек (Ollama, LiteLLM, Qdrant, n8n, Open WebUI) для мультиагентних систем
+- [x] Моделювання загроз автономних ШІ-агентів (Threat Modeling)
+- [x] Налаштування збору апаратних метрик та трейсингу запитів (AIOps & Observability)
 
 ### 🌟 Фаза 3 — Спільнота (Q1 2027) — 📅 Планується
 
-* [ ] **Continuous Benchmarking CI/CD**: Автоматизовані конвеєри для регулярного тестування швидкості (t/s/W) та точності локальних моделей при оновленні драйверів або релізах нових версій
-* [ ] **LLM-as-a-Judge**: Шаблони оцінки точності та відповідності (validation pipelines) для локальних RAG-систем без надсилання даних у хмару
-* [ ] **Нативний голосовий помічник (Direct Speech-to-Speech)**: Інтеграція та запуск моделі Gemma 4 12B (encoder-free native audio) на локальному залізі без додаткових ASR (Whisper) / TTS прошарків
-* [ ] **AI-HomeLab Portal**: Стартовий веб-дашборд для моніторингу статусу локальних серверів, VRAM, активних інференсів та логів агентів
-* [ ] **Практичне керівництво з vLLM & llama.cpp**: Тюнінг PagedAttention, KV-cache offloading та налаштування Speculative Decoding (MTP драфтери)
-* [ ] Партнерства з українськими AI-спільнотами та публікація матеріалів (DOU.ua, dev.to)
-* [ ] Щомісячний дайджест нових локальних моделей та інструментів розробки
+- [ ] **Continuous Benchmarking CI/CD**: Автоматизовані конвеєри для регулярного тестування швидкості (t/s/W) та точності локальних моделей при оновленні драйверів або релізах нових версій
+- [ ] **LLM-as-a-Judge**: Шаблони оцінки точності та відповідності (validation pipelines) для локальних RAG-систем без надсилання даних у хмару
+- [ ] **Нативний голосовий помічник (Direct Speech-to-Speech)**: Інтеграція та запуск моделі Gemma 4 12B (encoder-free native audio) на локальному залізі без додаткових ASR (Whisper) / TTS прошарків
+- [ ] **AI-HomeLab Portal**: Стартовий веб-дашборд для моніторингу статусу локальних серверів, VRAM, активних інференсів та логів агентів
+- [ ] **Практичне керівництво з vLLM & llama.cpp**: Тюнінг PagedAttention, KV-cache offloading та налаштування Speculative Decoding (MTP драфтери)
+- [ ] Партнерства з українськими AI-спільнотами та публікація матеріалів (DOU.ua, dev.to)
+- [ ] Щомісячний дайджест нових локальних моделей та інструментів розробки
 
 ---
 
@@ -429,11 +436,11 @@ flowchart TD
 
 ### 💬 Канали зв'язку
 
-| Платформа | Посилання | Призначення |
-| :--- | :--- | :--- |
-| **Telegram** | *Скоро* | Обговорення заліза, архітектури, купівля/продаж GPU |
-| **GitHub Discussions** | [Discussions](https://github.com/weby-homelab/AI-HOMELAB/discussions) | Питання, ідеї, RFC |
-| **Issues** | [Issues](https://github.com/weby-homelab/AI-HOMELAB/issues) | Баг-репорти та feature requests |
+| Платформа              | Посилання                                                             | Призначення                                         |
+| :--------------------- | :-------------------------------------------------------------------- | :-------------------------------------------------- |
+| **Telegram**           | _Скоро_                                                               | Обговорення заліза, архітектури, купівля/продаж GPU |
+| **GitHub Discussions** | [Discussions](https://github.com/weby-homelab/AI-HOMELAB/discussions) | Питання, ідеї, RFC                                  |
+| **Issues**             | [Issues](https://github.com/weby-homelab/AI-HOMELAB/issues)           | Баг-репорти та feature requests                     |
 
 ### 🤲 Як контриб'ютити
 
@@ -492,7 +499,7 @@ description: AI-HomeLab: домашні AI-лабораторії в Украї�
 applicationCategory: EducationalApplication
 applicationSubCategory: AI
 operatingSystem: Linux
-softwareVersion: 1.3.0
+softwareVersion: 1.4.0
 keywords: ai, llm, local-ai, rag, agents, self-hosted, homelab, ukraine, open-source, cost-optimization, low-code
 author: Weby Homelab (https://github.com/weby-homelab)
 codeRepository: https://github.com/weby-homelab/AI-HOMELAB
