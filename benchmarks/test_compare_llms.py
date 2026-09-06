@@ -1,7 +1,13 @@
 import json
 import unittest
 
-from benchmarks.compare_llms import TASKS, build_request_payload, extract_json_object, grade_task
+from benchmarks.compare_llms import (
+    TASKS,
+    build_request_payload,
+    extract_json_object,
+    grade_response,
+    grade_task,
+)
 
 
 class CompareLLMsHelpersTest(unittest.TestCase):
@@ -33,6 +39,12 @@ class CompareLLMsHelpersTest(unittest.TestCase):
         payload = build_request_payload(task, {"model": "local"})
 
         self.assertEqual(payload["tools"][0]["function"]["name"], "restart_service")
+
+    def test_length_limited_response_is_incomplete(self):
+        passed, detail = grade_response("math", "346", "length")
+
+        self.assertFalse(passed)
+        self.assertEqual(detail, "incomplete: max_tokens reached")
 
 
 if __name__ == "__main__":

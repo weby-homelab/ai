@@ -188,6 +188,12 @@ def grade_task(task_id: str, text: str) -> tuple[bool, str]:
     return False, f"unknown task: {task_id}"
 
 
+def grade_response(task_id: str, text: str, finish_reason: str | None) -> tuple[bool, str]:
+    if finish_reason == "length":
+        return False, "incomplete: max_tokens reached"
+    return grade_task(task_id, text)
+
+
 def _request_json(
     base_url: str, path: str, payload: dict[str, Any] | None, timeout: float
 ) -> dict[str, Any]:
@@ -318,8 +324,9 @@ def main() -> int:
                     args.timeout,
                 )
                 content, reasoning = _message_text(response)
+                finish_reason = response["choices"][0].get("finish_reason")
                 grading_text = content if content.strip() else reasoning
-                passed, detail = grade_task(task.task_id, grading_text)
+                passed, detail = grade_response(task.task_id, grading_text, finish_reason)
                 timings = response.get("timings") or {}
                 usage = response.get("usage") or {}
                 result = {
@@ -328,6 +335,8 @@ def main() -> int:
                     "repetition": repetition,
                     "status": "pass" if passed else "fail",
                     "grade_detail": detail,
+                    "finish_reason": finish_reason,
+                    "output_source": "content" if content.strip() else "reasoning",
                     "wall_ms": round((time.perf_counter() - started) * 1000, 3),
                     "content_chars": len(content),
                     "reasoning_chars": len(reasoning),
