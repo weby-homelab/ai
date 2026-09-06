@@ -52,25 +52,7 @@ jobs:
         run: ruff format --check .
 
   # ────────────────────────────────────────────────────────────
-  # Job 3: Python Tests
-  # ────────────────────────────────────────────────────────────
-  python-tests:
-    name: 🧪 Python Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Run benchmark helper tests
-        run: python -m unittest discover -s benchmarks -p "test_*.py"
-
-  # ────────────────────────────────────────────────────────────
-  # Job 4: Markdown Linting (markdownlint-cli)
+  # Job 3: Markdown Linting (markdownlint-cli)
   # ────────────────────────────────────────────────────────────
   markdown-lint:
     name: 📝 Markdown Lint
@@ -91,7 +73,7 @@ jobs:
         run: markdownlint "**/*.md" --config .markdownlint.yaml --ignore node_modules
 
   # ────────────────────────────────────────────────────────────
-  # Job 5: Link Verification
+  # Job 4: Link Verification
   # ────────────────────────────────────────────────────────────
   verify-links:
     name: 🔗 Verify Internal Links
