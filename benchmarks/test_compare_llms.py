@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from benchmarks.compare_llms import extract_json_object, grade_task
+from benchmarks.compare_llms import TASKS, build_request_payload, extract_json_object, grade_task
 
 
 class CompareLLMsHelpersTest(unittest.TestCase):
@@ -26,6 +26,13 @@ class CompareLLMsHelpersTest(unittest.TestCase):
 
         self.assertFalse(passed)
         self.assertTrue(detail.startswith("syntax error:"))
+
+    def test_tool_call_task_declares_a_function_schema(self):
+        task = next(task for task in TASKS if task.task_id == "tool_call")
+
+        payload = build_request_payload(task, {"model": "local"})
+
+        self.assertEqual(payload["tools"][0]["function"]["name"], "restart_service")
 
 
 if __name__ == "__main__":

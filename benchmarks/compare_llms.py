@@ -213,6 +213,29 @@ def _message_text(response: dict[str, Any]) -> tuple[str, str]:
     return str(content), str(reasoning)
 
 
+def build_request_payload(task: Task, common: dict[str, Any]) -> dict[str, Any]:
+    payload = {**common, "messages": [{"role": "user", "content": task.prompt}]}
+    if task.task_id == "tool_call":
+        payload["tools"] = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "restart_service",
+                    "description": "Restart one local service after a recoverable failure.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "reason": {"type": "string"},
+                        },
+                        "required": ["name", "reason"],
+                    },
+                },
+            }
+        ]
+    return payload
+
+
 def _atomic_write_json(path: Path, value: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
@@ -291,7 +314,7 @@ def main() -> int:
                 response = _request_json(
                     args.base_url,
                     "/v1/chat/completions",
-                    {**common, "messages": [{"role": "user", "content": task.prompt}]},
+                    build_request_payload(task, common),
                     args.timeout,
                 )
                 content, reasoning = _message_text(response)
