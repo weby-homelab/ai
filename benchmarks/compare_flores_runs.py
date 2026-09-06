@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import re
 import tempfile
@@ -13,7 +14,15 @@ from statistics import mean
 from typing import Any
 
 METRICS = ("sentence_bleu", "sentence_chrf_plus_plus")
-IDENTITY_FIELDS = ("benchmark", "dataset", "seed", "max_tokens", "engine_build", "run_profile")
+IDENTITY_FIELDS = (
+    "benchmark",
+    "dataset",
+    "seed",
+    "max_tokens",
+    "engine_build",
+    "run_profile",
+    "engine_binary_sha256",
+)
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -23,11 +32,21 @@ def _record_map(run: dict[str, Any]) -> dict[tuple[int, str], dict[str, Any]]:
         raise ValueError("run has no records")
     mapped = {}
     for record in records:
+        if not isinstance(record, dict):
+            raise ValueError("run has a non-object sentence record")
         key = (record.get("sentence_id"), record.get("direction"))
         if not isinstance(key[0], int) or not isinstance(key[1], str) or key in mapped:
             raise ValueError("run has invalid or duplicate sentence records")
+        if record.get("status") != "ok":
+            raise ValueError("pairwise comparison requires complete successful records")
         if any(metric not in record for metric in METRICS):
             raise ValueError("run record is missing a pairwise metric")
+        for metric in METRICS:
+            value = record[metric]
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError("run record contains a non-numeric pairwise metric")
+            if not math.isfinite(value) or not 0 <= value <= 100:
+                raise ValueError("run record contains an out-of-range pairwise metric")
         mapped[key] = record
     return mapped
 
@@ -59,11 +78,29 @@ def compare_results(left: dict[str, Any], right: dict[str, Any]) -> dict[str, An
         raise ValueError("right model SHA-256 is missing or invalid")
     if left_sha == right_sha:
         raise ValueError("left and right model SHA-256 values must differ")
+    engine_sha = left.get("engine_binary_sha256")
+    if not isinstance(engine_sha, str) or not SHA256_PATTERN.fullmatch(engine_sha):
+        raise ValueError("engine binary SHA-256 is missing or invalid")
 
     left_records = _record_map(left)
     right_records = _record_map(right)
     if set(left_records) != set(right_records):
         raise ValueError("runs do not contain the same aligned sentence IDs")
+
+    sample_ids = left.get("dataset", {}).get("sample_ids")
+    if (
+        not isinstance(sample_ids, list)
+        or not sample_ids
+        or any(not isinstance(value, int) for value in sample_ids)
+        or len(set(sample_ids)) != len(sample_ids)
+        or left["dataset"].get("sample_limit") != len(sample_ids)
+    ):
+        raise ValueError("dataset sample_ids are missing or invalid")
+    expected_keys = {
+        (sentence_id, direction) for sentence_id in sample_ids for direction in ("ukr_en", "en_ukr")
+    }
+    if set(left_records) != expected_keys:
+        raise ValueError("run records do not match both expected FLORES directions")
 
     directions = sorted({key[1] for key in left_records})
     direction_results = {}
@@ -92,6 +129,16 @@ def compare_results(left: dict[str, Any], right: dict[str, Any]) -> dict[str, An
             "model_sha256": right_sha,
         },
         "shared_dataset": left["dataset"],
+        "shared_runtime": {
+            field: left[field]
+            for field in (
+                "seed",
+                "max_tokens",
+                "engine_build",
+                "run_profile",
+                "engine_binary_sha256",
+            )
+        },
         "directions": direction_results,
         "overall": {
             metric: _counts(values["left"], values["right"])

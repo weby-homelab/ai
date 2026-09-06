@@ -1,4 +1,6 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from benchmarks.run_flores_ua_en import (
     _response_text,
@@ -7,6 +9,7 @@ from benchmarks.run_flores_ua_en import (
     normalize_text,
     select_indices,
     validate_base_url,
+    validate_dataset_files,
 )
 
 
@@ -44,6 +47,16 @@ class FloresHelpersTest(unittest.TestCase):
     def test_flores_base_url_rejects_credentials(self):
         with self.assertRaises(ValueError):
             validate_base_url("https://user:secret@example.test")
+
+    def test_dataset_validation_rejects_unpinned_files(self):
+        with TemporaryDirectory() as directory:
+            ukr_file = Path(directory) / "ukr_Cyrl.devtest"
+            eng_file = Path(directory) / "eng_Latn.devtest"
+            ukr_file.write_text("not FLORES\n", encoding="utf-8")
+            eng_file.write_text("not FLORES\n", encoding="utf-8")
+
+            with self.assertRaises(ValueError):
+                validate_dataset_files(ukr_file, eng_file)
 
 
 if __name__ == "__main__":

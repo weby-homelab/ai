@@ -24,6 +24,14 @@ if [[ "${WS_GPU_GUARD_ACTIVE:-0}" != "1" ]]; then
     printf 'refusing direct launch without WS GPU guard\n' >&2
     exit 1
 fi
+guard_parent="$(ps -o args= -p "$PPID" 2>/dev/null || true)"
+case "$guard_parent" in
+    *"/usr/local/bin/ws-gpu-task-50"*) ;;
+    *)
+        printf 'refusing launch without the WS GPU guard parent\n' >&2
+        exit 1
+        ;;
+esac
 export CUDA_MPS_ACTIVE_THREAD_PERCENTAGE=50
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 

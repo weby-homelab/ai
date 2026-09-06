@@ -10,7 +10,7 @@
 | Питання | Переможець / результат |
 |---|---|
 | Чиста генерація без speculative decoding | **Qwen3.5-9B MTP GGUF:** 64.33 t/s проти 38.70 t/s Gemma на depth 2K; 58.75 проти 38.15 на depth 8K |
-| Практична генерація з доступним MTP | **Qwen3.5-9B MTP:** 71.56–90.91 t/s у фінальній suite; Gemma MTP не стартував на цьому GGUF |
+| Практична генерація з доступним MTP | **Qwen3.5-9B MTP:** 56.98–90.56 t/s у фінальній suite; Gemma MTP не стартував на цьому GGUF |
 | Локальні реальні tasks (machine-only) | Gemma **8/8**, Qwen **7/8**; Qwen пропустив literal `rollback` у checklist |
 | FLORES-200 `ukr→en` проти reference | Невелика перевага Gemma: BLEU **44.7479** проти 43.5096; chrF++ **67.2039** проти 66.6242 |
 | FLORES-200 `en→ukr` проти reference | BLEU: Qwen **26.9537** проти 26.8086; chrF++: Qwen **55.0531** проти 54.5833 |
@@ -145,6 +145,11 @@ Grader не запускає generated Python і не передає model outpu
 через обмежені текстові contracts. Тому це machine-only functional contract
 test, а не SWE-bench і не human quality score.
 
+Перед запитами runner вимагає explicit model ID/file, engine binary, server PID
+і expected speculation mode. Він перевіряє `/proc/<pid>/exe`, cmdline (`-m`,
+`--port`, spec flag) та process environment (`MPS=50`, connections `=1`).
+API URL приймається лише на loopback без credentials/query/fragment.
+
 ### 4.3 Independent UA↔EN reference test
 
 Для багатомовності використано original **FLORES-200 devtest** corpus. Офіційний
@@ -171,7 +176,9 @@ translation requests, а обидві — той самий input/reference set.
 
 Scoring: `sacrebleu==2.5.1`, corpus BLEU з tokenizer `13a` і chrF++ з
 `char_order=6`, `word_order=2`, `beta=2`. Це **bounded subset result**, не
-офіційний full-corpus leaderboard score.
+офіційний full-corpus leaderboard score. Any incomplete/empty/error response is
+scored as an empty prediction and makes the runner non-zero; the comparator
+refuses runs containing anything other than complete `status=ok` records.
 
 ## 5. Official llama-bench: чиста швидкість
 
@@ -202,19 +209,21 @@ Scoring: `sacrebleu==2.5.1`, corpus BLEU з tokenizer `13a` і chrF++ з
 
 | Task | Qwen MTP | Qwen gen | Qwen MTP accept | Gemma | Gemma gen | Interpretation |
 |---|---|---:|---:|---|---:|---|
-| Code generation | PASS | 82.76 t/s | 79.11% | PASS | 39.13 t/s | Обидва дали валідний static Python contract |
-| Debugging | PASS | 86.14 t/s | 83.90% | PASS | 39.22 t/s | Обидва знайшли zero-denominator guard |
-| Structured JSON | PASS | 84.12 t/s | 81.37% | PASS | 39.35 t/s | Exact schema matched |
-| Math | PASS | 90.91 t/s | **92.76%** | PASS | 39.19 t/s | Exact `346` |
-| Ukrainian explanation | PASS | 82.73 t/s | 80.12% | PASS | 38.70 t/s | Language coverage contract matched |
-| Tool call | PASS | 71.56 t/s | 80.00% | PASS | 39.61 t/s | Structured `restart_service` / `llama-server` / OOM contract |
-| Long-context retrieval | PASS | 74.75 t/s | 83.79% | PASS | 35.73 t/s | Needle hidden only in final record |
-| Operations checklist | **FAIL** | 87.80 t/s | 89.10% | PASS | 38.66 t/s | Qwen omitted literal `rollback` |
+| Code generation | PASS | 82.97 t/s | 79.11% | PASS | 39.08 t/s | Обидва дали валідний static Python contract |
+| Debugging | PASS | 85.83 t/s | 83.90% | PASS | 39.51 t/s | Обидва знайшли zero-denominator guard |
+| Structured JSON | PASS | 83.80 t/s | 81.37% | PASS | 39.65 t/s | Exact schema matched |
+| Math | PASS | 90.56 t/s | **92.76%** | PASS | 39.46 t/s | Exact `346` |
+| Ukrainian explanation | PASS | 82.84 t/s | 80.12% | PASS | 38.91 t/s | Language coverage contract matched |
+| Tool call | PASS | 56.98 t/s | — | PASS | 39.29 t/s | Structured `restart_service` / `llama-server` / OOM contract |
+| Long-context retrieval | PASS | 75.00 t/s | 84.52% | PASS | 35.99 t/s | Needle hidden only in final record |
+| Operations checklist | **FAIL** | 87.20 t/s | 88.86% | PASS | 38.93 t/s | Qwen omitted literal `rollback` |
 | **Total** | **7/8** | — | — | **8/8** | — | Contract pass rate only |
 
 ### 6.2 What this does and does not prove
 
-- Qwen MTP roughly doubles API decode speed on this workload.
+- Qwen MTP roughly doubles API decode speed on the non-tool tasks; the forced
+  tool-call path is separately reported because its server timing omits draft
+  counters.
 - Gemma produced a complete answer for the operations checklist where Qwen did
   not include the required literal `rollback`.
 - This is not a claim that Gemma wins every coding or agent benchmark: the
@@ -260,8 +269,8 @@ measures translation rather than an arbitrary reasoning budget.
 
 | Model | `ukr→en` mean decode | `en→ukr` mean decode | Notes |
 |---|---:|---:|---|
-| Qwen3.5-9B MTP | 84.36 t/s | 75.55 t/s | Native MTP active |
-| Gemma 4 12B | 41.22 t/s | 40.65 t/s | Standard decode |
+| Qwen3.5-9B MTP | 84.58 t/s | 75.73 t/s | Native MTP active |
+| Gemma 4 12B | 41.19 t/s | 40.63 t/s | Standard decode |
 
 ## 8. Speculative decoding result
 
@@ -283,14 +292,17 @@ On the math probe:
 | Draft tokens accepted | 282 |
 | Acceptance | **92.76%** |
 | Decode (dedicated compatibility probe) | **91.97 t/s** |
-| Decode (final 8-task suite, math row) | **90.91 t/s** |
+| Decode (final 8-task suite, math row) | **90.56 t/s** |
 
 The two decode values are intentionally not collapsed: the first is a dedicated
 short probe, while the second is the final suite row with its own server state
 and request timing.
 
 Across the 8 quality tasks, Qwen MTP acceptance ranged from 79.11% to 92.76%
-and remained active in every request (`draft_n` / `draft_n_accepted` present).
+on the seven non-tool requests that expose `draft_n` /
+`draft_n_accepted`. The forced tool-call response remains structurally valid,
+but its server timing does not expose draft counters and is reported without an
+acceptance percentage.
 
 ### Gemma MTP gate
 
@@ -314,8 +326,8 @@ steady API quality runs. They are workload telemetry, not a power-limit claim.
 
 | Model/profile | Samples | Util max | Samples ≥90% | VRAM peak | Free minimum | Temp peak | Power peak |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Qwen3.5-9B MTP + MTP API | 624 | 99% | 79.81% | 8,650 MiB | 2,179 MiB | 66°C | 258.72 W |
-| Gemma 4 12B standard API | 618 | 100% | 20.71% | 9,714 MiB | 1,115 MiB | 65°C | 242.92 W |
+| Qwen3.5-9B MTP + MTP API | 627 | 99% | 79.47% | 8,642 MiB | 2,187 MiB | 67°C | 262.13 W |
+| Gemma 4 12B standard API | 619 | 100% | 75.36% | 9,714 MiB | 1,115 MiB | 66°C | 243.26 W |
 
 Both profiles pass the operational 1 GiB VRAM safety buffer in the final API
 run. Gemma is close to the boundary; the conservative `-b 512 -ub 256` profile
@@ -343,6 +355,7 @@ Installed and validated:
 | Artifact | Final state |
 |---|---|
 | `/usr/local/libexec/start_llama_qwen35.sh` | Qwen3.5-9B MTP default, `32768` context, q8 KV, batch 512/256 |
+| `/root/start_llama.sh` | Synchronized compatibility copy of the same guarded script; not the systemd ExecStart path |
 | `/etc/systemd/system/llama-server.service` | `enabled` + `active` |
 | `ExecStart` | `/usr/local/bin/ws-gpu-task-50 /usr/local/libexec/start_llama_qwen35.sh` |
 | API | `http://127.0.0.1:8080`, `/v1/models` ready |
@@ -414,8 +427,11 @@ python3 benchmarks/compare_llms.py \
   --base-url http://127.0.0.1:8080 \
   --model-id Qwen3.5-9B-MTP-Q4_0.gguf \
   --model-file /mnt/nvme-models/Qwen3.5-9B-MTP-Q4_0.gguf \
+  --engine-binary /usr/local/libexec/weby-llama-server \
+  --server-pid <server-pid> \
   --engine-build 85e22ea \
   --run-profile steady-mps50-no-host-pause \
+  --expected-spec draft-mtp \
   --output /tmp/compare.json \
   --repeats 1 --max-tokens 4096 --timeout 900
 ```
@@ -429,8 +445,11 @@ python3 -m venv /tmp/flores-venv
   --base-url http://127.0.0.1:8080 \
   --model-id Qwen3.5-9B-MTP-Q4_0.gguf \
   --model-file /mnt/nvme-models/Qwen3.5-9B-MTP-Q4_0.gguf \
+  --engine-binary /usr/local/libexec/weby-llama-server \
+  --server-pid <server-pid> \
   --engine-build 85e22ea \
   --run-profile steady-mps50-no-host-pause \
+  --expected-spec draft-mtp \
   --ukr-file /path/to/ukr_Cyrl.devtest \
   --eng-file /path/to/eng_Latn.devtest \
   --output /tmp/flores-result.json \
@@ -450,6 +469,10 @@ python3 benchmarks/compare_flores_runs.py \
 The comparator refuses different dataset contracts, sample IDs, seeds, runtime
 profiles, or model digests.
 
+The derived pairwise snapshot is checked in at
+[`flores-pairwise-2026-09-06.json`](./flores-pairwise-2026-09-06.json), so the
+reported win/tie counts are not a manual-only calculation.
+
 ## 12. Content-addressed evidence
 
 Raw model outputs and telemetry CSVs remain local under
@@ -465,11 +488,13 @@ snapshot.
 |---|---|
 | Qwen MTP `llama-bench` matrix | `905448e0c6001628524ad9e4212ba2a3fbd8ce9f587c9214736a0191dce5314a` |
 | Gemma `llama-bench` matrix | `d70ad7181d2624be79e37eb710702ffffe6c534d06614fb9598654bf47606df9` |
-| Qwen MTP strict quality JSON | `5bed07a8db8ca174d9f5c46f4404610bd86e077712edfc4ed23451602b70530b` |
-| Gemma strict quality JSON | `ebca262c7b3b95616a7504473d19b47e04e9f43a0dedd81888ac4ea1f55ee1c4` |
-| Qwen strict FLORES JSON | `bf040a603a06ca0c534493d8369673ff48164c82a8b97ec0eb7154ab7afe0cf7` |
-| Gemma strict FLORES JSON | `cb016d9dcacc99372a4101ddf389e864d7b9677400c9dfcc0a85670516f98a04` |
-| Derived FLORES pairwise JSON | `c658aba6fb6d37921da0b5fcbb31d9b69be7ef75fa7d909410326dc52ec55ee1` |
+| Qwen MTP canonical quality JSON | `f662ced39956b1c2537fb37174cb31f929eade5cb12d18205256c0ca91540121` |
+| Gemma canonical quality JSON | `a881daab67ac72590a641e9d55d047c449f8fc2ddd8b64c804596b1f9b7e6fed` |
+| Qwen canonical FLORES JSON | `a5dffe186c561aefedf3dc95fcb5f0045eb3f94dd7fa7eaa11ecd1ac7eed873f` |
+| Gemma canonical FLORES JSON | `37af2e83a243c392489f0d8641b0d12f5e852af3db878f0414cd445921189a46` |
+| Canonical FLORES pairwise JSON | `86c08b109ac4a517bed93e05d129937902086854a95d602e281818b387642852` |
+| Active llama-server binary | `2996eb560536e116b1fc4c751209992164c78e71882f1ab92bb2891569c148d9` |
+| llama-bench binary | `2ebad314051d872070996f71661cff0b619fc8c71e0da0ccc650f831ed524eb9` |
 
 ## 13. Limitations and next gate
 

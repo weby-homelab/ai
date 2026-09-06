@@ -47,13 +47,50 @@ def validate_base_url(raw_url: str) -> str:
     if (
         parts.scheme not in {"http", "https"}
         or not parts.hostname
+        or parts.hostname not in {"127.0.0.1", "localhost", "::1"}
         or parts.username is not None
         or parts.password is not None
         or parts.query
         or parts.fragment
+        or parts.path not in {"", "/"}
     ):
-        raise ValueError("base URL must be an HTTP(S) origin without credentials/query/fragment")
+        raise ValueError(
+            "base URL must be a loopback HTTP(S) origin without credentials/query/fragment"
+        )
     return urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), "", ""))
+
+
+def attest_server_process(
+    server_pid: int,
+    model_file: Path,
+    engine_binary: Path,
+    expected_spec: str,
+    expected_port: int,
+) -> None:
+    if server_pid < 1 or not engine_binary.is_file():
+        raise ValueError("server PID or engine binary is invalid")
+    proc_dir = Path(f"/proc/{server_pid}")
+    try:
+        actual_exe = (proc_dir / "exe").resolve()
+        command = (proc_dir / "cmdline").read_bytes().split(b"\0")
+        environment = (proc_dir / "environ").read_bytes().split(b"\0")
+    except OSError as exc:
+        raise ValueError("cannot attest server process") from exc
+    if actual_exe != engine_binary.resolve():
+        raise ValueError("server executable does not match --engine-binary")
+    if str(model_file.resolve()).encode() not in command:
+        raise ValueError("server command line does not contain --model-file")
+    if b"--port" not in command or str(expected_port).encode() not in command:
+        raise ValueError("server command line does not contain the requested API port")
+    environment_set = set(environment)
+    if b"CUDA_MPS_ACTIVE_THREAD_PERCENTAGE=50" not in environment_set:
+        raise ValueError("server process is not bound to MPS policy 50")
+    if b"CUDA_DEVICE_MAX_CONNECTIONS=1" not in environment_set:
+        raise ValueError("server process is not bound to CUDA connection policy")
+    if expected_spec == "none" and b"--spec-type" in command:
+        raise ValueError("server command line unexpectedly enables speculation")
+    if expected_spec != "none" and expected_spec.encode() not in command:
+        raise ValueError("server command line does not contain expected speculation mode")
 
 
 def expected_script_ratio(text: str, direction: str) -> float:
@@ -196,8 +233,11 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--base-url", default="http://127.0.0.1:8080")
     parser.add_argument("--model-id", required=True)
     parser.add_argument("--model-file", type=Path, required=True)
+    parser.add_argument("--engine-binary", type=Path, required=True)
+    parser.add_argument("--server-pid", type=int, required=True)
     parser.add_argument("--engine-build", required=True)
     parser.add_argument("--run-profile", required=True)
+    parser.add_argument("--expected-spec", required=True)
     parser.add_argument("--ukr-file", type=Path, required=True)
     parser.add_argument("--eng-file", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -216,11 +256,26 @@ def main() -> int:
     args = _parse_args()
     try:
         base_url = validate_base_url(args.base_url)
+        api_port = urlsplit(base_url).port
+        if api_port is None:
+            raise ValueError("base URL must include an explicit API port")
         if not args.model_file.is_file():
             raise ValueError("model file does not exist")
+        if not args.engine_binary.is_file():
+            raise ValueError("engine binary does not exist")
         model_sha256 = _sha256(args.model_file)
+        engine_sha256 = _sha256(args.engine_binary)
+        attest_server_process(
+            args.server_pid,
+            args.model_file,
+            args.engine_binary,
+            args.expected_spec,
+            api_port,
+        )
         validate_dataset_files(args.ukr_file, args.eng_file)
         examples = load_examples(args.ukr_file, args.eng_file, args.limit, args.stride)
+        if len({example.sentence_id for example in examples}) != args.limit:
+            raise ValueError("sample selection did not produce the requested item count")
         model_data = _request_json(base_url, "/v1/models", None, args.timeout)
         available_models = {entry["id"] for entry in model_data["data"]}
         if args.model_id not in available_models:
@@ -350,8 +405,12 @@ def main() -> int:
         "base_url": base_url,
         "model_file": str(args.model_file),
         "model_sha256": model_sha256,
+        "engine_binary": str(args.engine_binary),
+        "engine_binary_sha256": engine_sha256,
+        "server_pid": args.server_pid,
         "engine_build": args.engine_build,
         "run_profile": args.run_profile,
+        "expected_spec": args.expected_spec,
         "seed": args.seed,
         "max_tokens": args.max_tokens,
         "directions": aggregates,

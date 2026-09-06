@@ -11,7 +11,14 @@ def _run(model_id: str, model_sha256: str, bleu: float, chrf: float) -> dict:
             "status": "ok",
             "sentence_bleu": bleu,
             "sentence_chrf_plus_plus": chrf,
-        }
+        },
+        {
+            "sentence_id": 1,
+            "direction": "en_ukr",
+            "status": "ok",
+            "sentence_bleu": bleu,
+            "sentence_chrf_plus_plus": chrf,
+        },
     ]
     return {
         "schema_version": 1,
@@ -19,6 +26,7 @@ def _run(model_id: str, model_sha256: str, bleu: float, chrf: float) -> dict:
         "dataset": {"sample_ids": [1], "sample_limit": 1, "sample_stride": 20},
         "model_id": model_id,
         "model_sha256": model_sha256,
+        "engine_binary_sha256": "c" * 64,
         "engine_build": "85e22ea",
         "run_profile": "steady",
         "seed": 42,
@@ -36,17 +44,25 @@ class CompareFloresRunsTest(unittest.TestCase):
 
         self.assertEqual(
             result["overall"]["sentence_bleu"],
-            {"left": 1, "right": 0, "ties": 0, "mean_delta_left_minus_right": 1.0},
+            {"left": 2, "right": 0, "ties": 0, "mean_delta_left_minus_right": 1.0},
         )
         self.assertEqual(
             result["overall"]["sentence_chrf_plus_plus"],
-            {"left": 0, "right": 1, "ties": 0, "mean_delta_left_minus_right": -1.0},
+            {"left": 0, "right": 2, "ties": 0, "mean_delta_left_minus_right": -1.0},
         )
 
     def test_compare_results_rejects_different_dataset_contracts(self):
         left = _run("qwen", "a" * 64, 2.0, 4.0)
         right = _run("gemma", "b" * 64, 1.0, 5.0)
         right["dataset"]["sample_ids"] = [2]
+
+        with self.assertRaises(ValueError):
+            compare_results(left, right)
+
+    def test_compare_results_rejects_incomplete_records(self):
+        left = _run("qwen", "a" * 64, 2.0, 4.0)
+        right = _run("gemma", "b" * 64, 1.0, 5.0)
+        left["records"][0]["status"] = "incomplete"
 
         with self.assertRaises(ValueError):
             compare_results(left, right)

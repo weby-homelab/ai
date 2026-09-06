@@ -59,17 +59,18 @@ class CompareLLMsHelpersTest(unittest.TestCase):
         payload = build_request_payload(task, {"model": "local"})
 
         self.assertEqual(payload["tools"][0]["function"]["name"], "restart_service")
-        self.assertEqual(payload["tool_choice"]["function"]["name"], "restart_service")
+        self.assertEqual(payload["tool_choice"], "required")
 
     def test_tool_call_grading_requires_structured_arguments(self):
         passed, detail = grade_tool_call_message(
             {
                 "tool_calls": [
                     {
+                        "type": "function",
                         "function": {
                             "name": "restart_service",
                             "arguments": '{"name":"llama-server","reason":"OOM recovery"}',
-                        }
+                        },
                     }
                 ]
             }
