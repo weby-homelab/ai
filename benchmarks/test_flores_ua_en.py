@@ -1,10 +1,12 @@
 import unittest
 
 from benchmarks.run_flores_ua_en import (
+    _response_text,
     build_translation_payload,
     expected_script_ratio,
     normalize_text,
     select_indices,
+    validate_base_url,
 )
 
 
@@ -23,6 +25,25 @@ class FloresHelpersTest(unittest.TestCase):
         payload = build_translation_payload("local", "Translate only.", "Hello", 256, 42)
 
         self.assertEqual(payload["chat_template_kwargs"]["enable_thinking"], False)
+
+    def test_translation_response_does_not_fallback_to_hidden_reasoning(self):
+        text, finish_reason = _response_text(
+            {
+                "choices": [
+                    {
+                        "message": {"content": None, "reasoning_content": "hidden"},
+                        "finish_reason": "length",
+                    }
+                ]
+            }
+        )
+
+        self.assertEqual(text, "")
+        self.assertEqual(finish_reason, "length")
+
+    def test_flores_base_url_rejects_credentials(self):
+        with self.assertRaises(ValueError):
+            validate_base_url("https://user:secret@example.test")
 
 
 if __name__ == "__main__":

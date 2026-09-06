@@ -16,7 +16,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit, urlunsplit
 from urllib.request import Request, urlopen
+
+EXPECTED_DEVTEST_ROWS = 1012
+EXPECTED_UKR_SHA256 = "7bb8f160a455fca27032bdd292dd65838b7aa5a8324c6aedd03ccdf92e20dbc4"
+EXPECTED_ENG_SHA256 = "612e9fbe87997617c0fa8fa8929654a4f49b728d96738112c2b86ef6a1d78d88"
 
 
 @dataclass(frozen=True)
@@ -35,6 +40,20 @@ def select_indices(total: int, limit: int, stride: int) -> list[int]:
 
 def normalize_text(text: str) -> str:
     return " ".join(text.casefold().split())
+
+
+def validate_base_url(raw_url: str) -> str:
+    parts = urlsplit(raw_url)
+    if (
+        parts.scheme not in {"http", "https"}
+        or not parts.hostname
+        or parts.username is not None
+        or parts.password is not None
+        or parts.query
+        or parts.fragment
+    ):
+        raise ValueError("base URL must be an HTTP(S) origin without credentials/query/fragment")
+    return urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), "", ""))
 
 
 def expected_script_ratio(text: str, direction: str) -> float:
@@ -62,9 +81,18 @@ def load_examples(ukr_file: Path, eng_file: Path, limit: int, stride: int) -> li
     return examples
 
 
+def validate_dataset_files(ukr_file: Path, eng_file: Path) -> None:
+    ukr_lines = ukr_file.read_text(encoding="utf-8").splitlines()
+    eng_lines = eng_file.read_text(encoding="utf-8").splitlines()
+    if len(ukr_lines) != EXPECTED_DEVTEST_ROWS or len(eng_lines) != EXPECTED_DEVTEST_ROWS:
+        raise ValueError("unexpected FLORES-200 devtest row count")
+    if _sha256(ukr_file) != EXPECTED_UKR_SHA256 or _sha256(eng_file) != EXPECTED_ENG_SHA256:
+        raise ValueError("FLORES-200 files do not match the pinned reference snapshot")
+
+
 def _strip_thinking(text: str) -> str:
     text = re.sub(r"<think>.*?</think>", "", text, flags=re.IGNORECASE | re.DOTALL)
-    text = re.sub(r"<\|channel\|>thought.*?<channel\|>", "", text, flags=re.IGNORECASE | re.DOTALL)
+    text = re.sub(r"<\|channel>thought.*?<channel\|>", "", text, flags=re.IGNORECASE | re.DOTALL)
     return text.strip()
 
 
@@ -74,8 +102,7 @@ def _response_text(response: dict[str, Any]) -> tuple[str, str | None]:
     content = message.get("content") or ""
     if isinstance(content, list):
         content = "".join(part.get("text", "") for part in content if isinstance(part, dict))
-    reasoning = message.get("reasoning_content") or message.get("reasoning") or ""
-    text = _strip_thinking(str(content) if str(content).strip() else str(reasoning))
+    text = _strip_thinking(str(content))
     return text, choice.get("finish_reason")
 
 
@@ -167,7 +194,10 @@ def _atomic_write_json(path: Path, value: dict[str, Any]) -> None:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8080")
-    parser.add_argument("--model-id", default=None)
+    parser.add_argument("--model-id", required=True)
+    parser.add_argument("--model-file", type=Path, required=True)
+    parser.add_argument("--engine-build", required=True)
+    parser.add_argument("--run-profile", required=True)
     parser.add_argument("--ukr-file", type=Path, required=True)
     parser.add_argument("--eng-file", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -185,11 +215,19 @@ def _parse_args() -> argparse.Namespace:
 def main() -> int:
     args = _parse_args()
     try:
+        base_url = validate_base_url(args.base_url)
+        if not args.model_file.is_file():
+            raise ValueError("model file does not exist")
+        model_sha256 = _sha256(args.model_file)
+        validate_dataset_files(args.ukr_file, args.eng_file)
         examples = load_examples(args.ukr_file, args.eng_file, args.limit, args.stride)
-        model_data = _request_json(args.base_url, "/v1/models", None, args.timeout)
-        model_id = args.model_id or model_data["data"][0]["id"]
+        model_data = _request_json(base_url, "/v1/models", None, args.timeout)
+        available_models = {entry["id"] for entry in model_data["data"]}
+        if args.model_id not in available_models:
+            raise ValueError("requested model ID is not advertised by the server")
+        model_id = args.model_id
         import sacrebleu  # noqa: F401  # checked explicitly by _score
-    except (KeyError, IndexError, RuntimeError, ValueError, ImportError) as exc:
+    except (KeyError, IndexError, OSError, RuntimeError, ValueError, ImportError) as exc:
         print(f"benchmark setup failed: {exc}", file=sys.stderr)
         return 2
 
@@ -203,7 +241,7 @@ def main() -> int:
         "stream": False,
     }
     try:
-        _request_json(args.base_url, "/v1/chat/completions", warmup, args.timeout)
+        _request_json(base_url, "/v1/chat/completions", warmup, args.timeout)
     except RuntimeError as exc:
         print(f"warmup failed: {exc}", file=sys.stderr)
         return 2
@@ -221,20 +259,29 @@ def main() -> int:
         )
         started = time.perf_counter()
         try:
-            response = _request_json(args.base_url, "/v1/chat/completions", payload, args.timeout)
+            response = _request_json(base_url, "/v1/chat/completions", payload, args.timeout)
             prediction, finish_reason = _response_text(response)
             timings = response.get("timings") or {}
             usage = response.get("usage") or {}
-            sentence_bleu, sentence_chrf = _sentence_score(prediction, example.reference)
-            if prediction:
-                scored[example.direction][0].append(prediction)
-                scored[example.direction][1].append(example.reference)
+            status = (
+                "ok"
+                if prediction and finish_reason == "stop"
+                else "incomplete"
+                if prediction
+                else "empty"
+            )
+            scoring_prediction = prediction if status == "ok" else ""
+            sentence_bleu, sentence_chrf = _sentence_score(scoring_prediction, example.reference)
+            scored[example.direction][0].append(scoring_prediction)
+            scored[example.direction][1].append(example.reference)
             record = {
                 "sentence_id": example.sentence_id,
                 "direction": example.direction,
-                "status": "ok" if prediction else "empty",
+                "status": status,
                 "finish_reason": finish_reason,
-                "script_ratio": round(expected_script_ratio(prediction, example.direction), 6),
+                "script_ratio": round(
+                    expected_script_ratio(scoring_prediction, example.direction), 6
+                ),
                 "sentence_bleu": round(sentence_bleu, 6),
                 "sentence_chrf_plus_plus": round(sentence_chrf, 6),
                 "output_chars": len(prediction),
@@ -249,8 +296,13 @@ def main() -> int:
                 "direction": example.direction,
                 "status": "error",
                 "error_type": type(exc).__name__,
+                "script_ratio": 0.0,
+                "sentence_bleu": 0.0,
+                "sentence_chrf_plus_plus": 0.0,
                 "wall_ms": round((time.perf_counter() - started) * 1000, 3),
             }
+            scored[example.direction][0].append("")
+            scored[example.direction][1].append(example.reference)
         records.append(record)
         print(json.dumps(record, ensure_ascii=False))
 
@@ -262,17 +314,24 @@ def main() -> int:
         aggregates[direction] = {
             "items": len(direction_records),
             "successful_items": len(valid),
+            "incomplete_items": sum(
+                record["status"] == "incomplete" for record in direction_records
+            ),
+            "empty_items": sum(record["status"] == "empty" for record in direction_records),
+            "error_items": sum(record["status"] == "error" for record in direction_records),
             "corpus_bleu": round(bleu, 4),
             "corpus_chrf_plus_plus": round(chrf, 4),
             "mean_script_ratio": round(
-                sum(record["script_ratio"] for record in valid) / len(valid), 4
-            )
-            if valid
-            else 0.0,
+                sum(record["script_ratio"] for record in direction_records)
+                / len(direction_records),
+                4,
+            ),
             "target_script_compliance_rate": round(
-                sum(record["script_ratio"] >= 0.5 for record in valid) / len(valid), 4
+                sum(record["script_ratio"] >= 0.5 for record in direction_records)
+                / len(direction_records),
+                4,
             )
-            if valid
+            if direction_records
             else 0.0,
         }
 
@@ -288,14 +347,18 @@ def main() -> int:
             "sample_ids": sorted({example.sentence_id for example in examples}),
         },
         "model_id": model_id,
-        "base_url": args.base_url,
+        "base_url": base_url,
+        "model_file": str(args.model_file),
+        "model_sha256": model_sha256,
+        "engine_build": args.engine_build,
+        "run_profile": args.run_profile,
         "seed": args.seed,
         "max_tokens": args.max_tokens,
         "directions": aggregates,
         "records": records,
     }
     _atomic_write_json(args.output, result)
-    return 1 if any(record["status"] == "error" for record in records) else 0
+    return 1 if any(record["status"] != "ok" for record in records) else 0
 
 
 if __name__ == "__main__":

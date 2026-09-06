@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 LONG_CONTEXT_MARKER = "WS-BENCHMARK-NEEDLE-7F3A-2026"
@@ -123,40 +124,147 @@ def _has_function(tree: ast.Module, name: str) -> bool:
     )
 
 
+def _find_function(tree: ast.Module, name: str) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    return next(
+        (
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == name
+        ),
+        None,
+    )
+
+
+def _has_hashlib_sha256_call(tree: ast.Module) -> bool:
+    return any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "sha256"
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == "hashlib"
+        for node in ast.walk(tree)
+    )
+
+
+def _has_hashlib_import(tree: ast.Module) -> bool:
+    return any(
+        isinstance(node, ast.Import) and any(alias.name == "hashlib" for alias in node.names)
+        for node in ast.walk(tree)
+    )
+
+
+def _has_zero_denominator_guard(tree: ast.Module) -> bool:
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Compare):
+            continue
+        if (
+            isinstance(node.left, ast.Name)
+            and node.left.id == "denominator"
+            and len(node.ops) == 1
+            and isinstance(node.ops[0], ast.Eq)
+            and len(node.comparators) == 1
+            and isinstance(node.comparators[0], ast.Constant)
+            and node.comparators[0].value == 0
+        ):
+            return True
+    return False
+
+
+def validate_base_url(raw_url: str) -> str:
+    parts = urlsplit(raw_url)
+    if (
+        parts.scheme not in {"http", "https"}
+        or not parts.hostname
+        or parts.username is not None
+        or parts.password is not None
+        or parts.query
+        or parts.fragment
+    ):
+        raise ValueError("base URL must be an HTTP(S) origin without credentials/query/fragment")
+    return urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), "", ""))
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def grade_tool_call_message(message: dict[str, Any]) -> tuple[bool, str]:
+    tool_calls = message.get("tool_calls")
+    if not isinstance(tool_calls, list) or len(tool_calls) != 1:
+        return False, "exactly one structured tool call required"
+    function = tool_calls[0].get("function")
+    if not isinstance(function, dict) or function.get("name") != "restart_service":
+        return False, "wrong tool name"
+    arguments = function.get("arguments")
+    if isinstance(arguments, str):
+        try:
+            arguments = json.loads(arguments)
+        except json.JSONDecodeError:
+            return False, "tool arguments are not JSON"
+    if not isinstance(arguments, dict):
+        return False, "tool arguments are not an object"
+    if arguments.get("name") != "llama-server":
+        return False, "wrong service name"
+    if "oom" not in str(arguments.get("reason", "")).casefold():
+        return False, "reason does not mention OOM"
+    return True, "structured tool call matched"
+
+
 def grade_task(task_id: str, text: str) -> tuple[bool, str]:
     """Grade without executing model output or interpreting it as a command."""
     if task_id == "code_generation":
         tree = _parse_python(text)
         if tree is None:
             return False, "syntax error: invalid Python"
-        source = extract_code_block(text).lower()
-        required = ("stable_sha256", "hashlib", "sha256", "salt")
-        if not _has_function(tree, "stable_sha256"):
+        function = _find_function(tree, "stable_sha256")
+        if function is None:
             return False, "missing stable_sha256"
-        missing = [token for token in required if token not in source]
-        return (not missing, "static contract matched" if not missing else f"missing: {missing[0]}")
+        arguments = {argument.arg for argument in function.args.args}
+        if not {"value", "salt"}.issubset(arguments):
+            return False, "missing value/salt parameters"
+        if not _has_hashlib_import(tree) or not _has_hashlib_sha256_call(tree):
+            return False, "missing hashlib.sha256 call"
+        return True, "AST contract matched"
 
     if task_id == "debugging":
         tree = _parse_python(text)
         if tree is None:
             return False, "syntax error: invalid Python"
-        source = extract_code_block(text).lower().replace(" ", "")
-        if not _has_function(tree, "safe_ratio"):
+        function = _find_function(tree, "safe_ratio")
+        if function is None:
             return False, "missing safe_ratio"
-        has_zero_guard = "denominator==0" in source or "zerodivisionerror" in source
-        if not has_zero_guard:
+        if not _has_zero_denominator_guard(function):
             return False, "missing zero-denominator guard"
-        return True, "static contract matched"
+        has_division = any(
+            isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div)
+            for node in ast.walk(function)
+        )
+        has_zero_return = any(
+            isinstance(node, ast.Return)
+            and isinstance(node.value, ast.Constant)
+            and node.value.value == 0.0
+            for node in ast.walk(function)
+        )
+        if not has_division or not has_zero_return:
+            return False, "missing quotient/zero return"
+        return True, "AST contract matched"
 
     if task_id == "structured_json":
-        value = extract_json_object(text)
+        try:
+            value = json.loads(text.strip())
+        except json.JSONDecodeError:
+            value = None
         expected = {"service": "llama-server", "port": 8080, "tls": True}
         return (value == expected, "schema matched" if value == expected else "schema mismatch")
 
     if task_id == "math":
-        matched = re.search(r"(?<!\d)346(?!\d)", text)
+        matched = text.strip() == "346"
         return (
-            matched is not None,
+            matched,
             "exact result present" if matched else "expected result absent",
         )
 
@@ -167,13 +275,10 @@ def grade_task(task_id: str, text: str) -> tuple[bool, str]:
         return (len(text.strip()) >= 60 and hits >= 3, f"language coverage={hits}/5")
 
     if task_id == "tool_call":
-        normalized = text.casefold()
-        required = ("restart_service", "llama-server", "oom")
-        missing = [token for token in required if token not in normalized]
-        return (not missing, "tool contract matched" if not missing else f"missing: {missing[0]}")
+        return False, "structured tool_calls field required"
 
     if task_id == "long_context":
-        matched = LONG_CONTEXT_MARKER in text
+        matched = text.strip() == LONG_CONTEXT_MARKER
         return (matched, "needle found" if matched else "needle absent")
 
     if task_id == "ops_plan":
@@ -239,6 +344,10 @@ def build_request_payload(task: Task, common: dict[str, Any]) -> dict[str, Any]:
                 },
             }
         ]
+        payload["tool_choice"] = {
+            "type": "function",
+            "function": {"name": "restart_service"},
+        }
     return payload
 
 
@@ -256,7 +365,10 @@ def _atomic_write_json(path: Path, value: dict[str, Any]) -> None:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8080")
-    parser.add_argument("--model-id", default=None)
+    parser.add_argument("--model-id", required=True)
+    parser.add_argument("--model-file", type=Path, required=True)
+    parser.add_argument("--engine-build", required=True)
+    parser.add_argument("--run-profile", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--max-tokens", type=int, default=512)
@@ -274,6 +386,14 @@ def _parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = _parse_args()
+    try:
+        base_url = validate_base_url(args.base_url)
+        if not args.model_file.is_file():
+            raise ValueError("model file does not exist")
+        model_sha256 = sha256_file(args.model_file)
+    except (OSError, ValueError) as exc:
+        print(f"runtime identity failed: {exc}", file=sys.stderr)
+        return 2
     selected_ids = set(args.tasks.split(",")) if args.tasks else {task.task_id for task in TASKS}
     selected = tuple(task for task in TASKS if task.task_id in selected_ids)
     unknown = selected_ids - {task.task_id for task in TASKS}
@@ -282,9 +402,12 @@ def main() -> int:
         return 2
 
     try:
-        models = _request_json(args.base_url, "/v1/models", None, args.timeout)
-        model_id = args.model_id or models["data"][0]["id"]
-    except (KeyError, IndexError, RuntimeError) as exc:
+        models = _request_json(base_url, "/v1/models", None, args.timeout)
+        available_models = {entry["id"] for entry in models["data"]}
+        if args.model_id not in available_models:
+            raise ValueError("requested model ID is not advertised by the server")
+        model_id = args.model_id
+    except (KeyError, IndexError, RuntimeError, ValueError) as exc:
         print(f"model discovery failed: {exc}", file=sys.stderr)
         return 2
 
@@ -299,7 +422,7 @@ def main() -> int:
     if not args.no_warmup:
         try:
             _request_json(
-                args.base_url,
+                base_url,
                 "/v1/chat/completions",
                 {
                     **common,
@@ -323,10 +446,19 @@ def main() -> int:
                     build_request_payload(task, common),
                     args.timeout,
                 )
+                message = response["choices"][0]["message"]
                 content, reasoning = _message_text(response)
                 finish_reason = response["choices"][0].get("finish_reason")
-                grading_text = content if content.strip() else reasoning
-                passed, detail = grade_response(task.task_id, grading_text, finish_reason)
+                tool_calls = message.get("tool_calls")
+                if task.task_id == "tool_call":
+                    passed, detail = grade_tool_call_message(message)
+                    grading_text = ""
+                elif not content.strip():
+                    passed, detail = False, "missing final content"
+                    grading_text = ""
+                else:
+                    grading_text = content
+                    passed, detail = grade_response(task.task_id, grading_text, finish_reason)
                 timings = response.get("timings") or {}
                 usage = response.get("usage") or {}
                 result = {
@@ -336,7 +468,12 @@ def main() -> int:
                     "status": "pass" if passed else "fail",
                     "grade_detail": detail,
                     "finish_reason": finish_reason,
-                    "output_source": "content" if content.strip() else "reasoning",
+                    "output_source": "content"
+                    if content.strip()
+                    else "tool_calls"
+                    if tool_calls
+                    else "none",
+                    "tool_call_count": len(tool_calls) if isinstance(tool_calls, list) else 0,
                     "wall_ms": round((time.perf_counter() - started) * 1000, 3),
                     "content_chars": len(content),
                     "reasoning_chars": len(reasoning),
@@ -359,8 +496,12 @@ def main() -> int:
     summary = {
         "schema_version": 1,
         "tool": "AI-HOMELAB/benchmarks/compare_llms.py",
-        "base_url": args.base_url,
+        "base_url": base_url,
         "model_id": model_id,
+        "model_file": str(args.model_file),
+        "model_sha256": model_sha256,
+        "engine_build": args.engine_build,
+        "run_profile": args.run_profile,
         "repeats": args.repeats,
         "seed": args.seed,
         "warmup": not args.no_warmup,

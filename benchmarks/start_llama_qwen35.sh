@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-BEE_BIN="${BEE_BIN:-/root/beellama.cpp/build/bin/llama-server}"
+BEE_BIN="${BEE_BIN:-/usr/local/libexec/weby-llama-server}"
 MODEL_PATH="${MODEL_PATH:-/mnt/nvme-models/Qwen3.5-9B-MTP-Q4_0.gguf}"
-HOST="${HOST:-0.0.0.0}"
+HOST="127.0.0.1"
 PORT="${PORT:-8080}"
 THREADS="${THREADS:-10}"
 CONTEXT_SIZE="${CONTEXT_SIZE:-32768}"
@@ -12,8 +12,16 @@ UBATCH_SIZE="${UBATCH_SIZE:-256}"
 SPEC_TYPE="${SPEC_TYPE:-draft-mtp}"
 DRAFT_N_MAX="${DRAFT_N_MAX:-2}"
 
-export CUDA_MPS_ACTIVE_THREAD_PERCENTAGE="${CUDA_MPS_ACTIVE_THREAD_PERCENTAGE:-50}"
-export CUDA_DEVICE_MAX_CONNECTIONS="${CUDA_DEVICE_MAX_CONNECTIONS:-1}"
+if [[ "${CUDA_MPS_ACTIVE_THREAD_PERCENTAGE:-50}" != "50" ]]; then
+    printf 'refusing non-policy CUDA_MPS_ACTIVE_THREAD_PERCENTAGE\n' >&2
+    exit 1
+fi
+if [[ "${CUDA_DEVICE_MAX_CONNECTIONS:-1}" != "1" ]]; then
+    printf 'refusing non-policy CUDA_DEVICE_MAX_CONNECTIONS\n' >&2
+    exit 1
+fi
+export CUDA_MPS_ACTIVE_THREAD_PERCENTAGE=50
+export CUDA_DEVICE_MAX_CONNECTIONS=1
 
 if [[ ! -x "$BEE_BIN" ]]; then
     printf 'llama-server binary is not executable: %s\n' "$BEE_BIN" >&2
