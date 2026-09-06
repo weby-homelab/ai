@@ -3,6 +3,7 @@ import unittest
 
 from benchmarks.compare_llms import (
     TASKS,
+    build_long_context_prompt,
     build_request_payload,
     extract_json_object,
     grade_response,
@@ -45,6 +46,11 @@ class CompareLLMsHelpersTest(unittest.TestCase):
 
         self.assertFalse(passed)
         self.assertEqual(detail, "incomplete: max_tokens reached")
+
+    def test_long_context_needle_is_not_leaked_in_the_instruction(self):
+        prompt = build_long_context_prompt()
+
+        self.assertEqual(prompt.count("WS-BENCHMARK-NEEDLE-7F3A-2026"), 1)
 
 
 if __name__ == "__main__":
