@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "run_id": "ws-qwen35-mtp-vs-gemma4-2026-09-06",
+  "host": "WS",
+  "engine": {
+    "name": "BeeLlama.cpp",
+    "build_commit": "85e22ea",
+    "binary_path": "/usr/local/libexec/weby-llama-server",
+    "binary_sha256": "2996eb560536e116b1fc4c751209992164c78e71882f1ab92bb2891569c148d9"
+  },
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 2080 Ti",
+    "driver": "610.57.04",
+    "cuda": "13.3",
+    "cpu": "Intel Xeon E5-2666 v3",
+    "ram": "128 GB DDR4 ECC Registered"
+  },
+  "resource_policy": {
+    "mps_service": "nvidia-cuda-mps.service",
+    "mps_default_active_thread_percentage": 50,
+    "cuda_device_max_connections": 1,
+    "production_host_governor": "/usr/local/bin/ws-gpu-task-50",
+    "steady_benchmark_mode": "direct MPS env, host STOP/CONT governor disabled by explicit approval"
+  },
+  "deployment": {
+    "source_script": "benchmarks/start_llama_qwen35.sh",
+    "source_script_sha256": "54f5780632eefc072b662781d3b959aecf794cb6699019ce5f9d952ab840dbfb",
+    "installed_script": "/usr/local/libexec/start_llama_qwen35.sh",
+    "installed_script_sha256": "54f5780632eefc072b662781d3b959aecf794cb6699019ce5f9d952ab840dbfb",
+    "source_unit": "benchmarks/llama-server-qwen35.service",
+    "source_unit_sha256": "c0a32fd5df740de732d5b6546049a405dff8968224fa1211a769468da4fcb117",
+    "installed_unit": "/etc/systemd/system/llama-server.service",
+    "installed_unit_sha256": "c0a32fd5df740de732d5b6546049a405dff8968224fa1211a769468da4fcb117",
+    "service_user": "root (MPS compatibility residual)",
+    "listen_address": "127.0.0.1:8080"
+  },
+  "models": [
+    {
+      "model_id": "Qwen3.5-9B-MTP-Q4_0.gguf",
+      "official_base": "Qwen/Qwen3.5-9B",
+      "runtime_artifact": "unsloth/Qwen3.5-9B-MTP-GGUF",
+      "path": "/mnt/nvme-models/Qwen3.5-9B-MTP-Q4_0.gguf",
+      "quantization": "Q4_0",
+      "sha256": "1b69b7e765387778195c044b5aa1db9c5232568f9dbdc4704b940f612b7d7498",
+      "speculation": "draft-mtp, n-max=2"
+    },
+    {
+      "model_id": "gemma-4-12b-it-qat-q4_0.gguf",
+      "official_base": "google/gemma-4-12B-it",
+      "runtime_artifact": "google/gemma-4-12B-it-qat-q4_0-gguf",
+      "path": "/mnt/nvme-models/gemma-4-12b-it-qat-q4_0.gguf",
+      "quantization": "Google QAT Q4_0",
+      "sha256": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b",
+      "speculation": "standard decode; compatible MTP context not available"
+    }
+  ],
+  "reference": {
+    "name": "FLORES-200 original devtest",
+    "total_aligned_sentences": 1012,
+    "sample_limit": 50,
+    "sample_stride": 20,
+    "ukr_file_sha256": "7bb8f160a455fca27032bdd292dd65838b7aa5a8324c6aedd03ccdf92e20dbc4",
+    "eng_file_sha256": "612e9fbe87997617c0fa8fa8929654a4f49b728d96738112c2b86ef6a1d78d88",
+    "scorer": "sacrebleu==2.5.1; BLEU tokenize=13a; chrF++ char_order=6 word_order=2 beta=2"
+  },
+  "evidence": [
+    {
+      "name": "qwen_llama_bench_steady_matrix",
+      "local_path": "/tmp/opencode/llm-compare-20260906/qwen_mtp_llama_bench_steady_matrix.json",
+      "sha256": "905448e0c6001628524ad9e4212ba2a3fbd8ce9f587c9214736a0191dce5314a"
+    },
+    {
+      "name": "gemma_llama_bench_steady_matrix",
+      "local_path": "/tmp/opencode/llm-compare-20260906/gemma_llama_bench_steady_matrix.json",
+      "sha256": "d70ad7181d2624be79e37eb710702ffffe6c534d06614fb9598654bf47606df9"
+    },
+    {
+      "name": "qwen_quality_final",
+      "local_path": "/tmp/opencode/llm-compare-20260906/qwen_mtp_api_final.json",
+      "sha256": "5bed07a8db8ca174d9f5c46f4404610bd86e077712edfc4ed23451602b70530b"
+    },
+    {
+      "name": "gemma_quality_final",
+      "local_path": "/tmp/opencode/llm-compare-20260906/gemma_api_final.json",
+      "sha256": "ebca262c7b3b95616a7504473d19b47e04e9f43a0dedd81888ac4ea1f55ee1c4"
+    },
+    {
+      "name": "qwen_flores_final",
+      "local_path": "/tmp/opencode/llm-compare-20260906/qwen_flores_final.json",
+      "sha256": "bf040a603a06ca0c534493d8369673ff48164c82a8b97ec0eb7154ab7afe0cf7"
+    },
+    {
+      "name": "gemma_flores_final",
+      "local_path": "/tmp/opencode/llm-compare-20260906/gemma_flores_final.json",
+      "sha256": "cb016d9dcacc99372a4101ddf389e864d7b9677400c9dfcc0a85670516f98a04"
+    },
+    {
+      "name": "flores_pairwise_final",
+      "local_path": "/tmp/opencode/llm-compare-20260906/flores_pairwise_canonical.json",
+      "sha256": "c658aba6fb6d37921da0b5fcbb31d9b69be7ef75fa7d909410326dc52ec55ee1"
+    }
+  ]
+}

@@ -20,6 +20,10 @@ if [[ "${CUDA_DEVICE_MAX_CONNECTIONS:-1}" != "1" ]]; then
     printf 'refusing non-policy CUDA_DEVICE_MAX_CONNECTIONS\n' >&2
     exit 1
 fi
+if [[ "${WS_GPU_GUARD_ACTIVE:-0}" != "1" ]]; then
+    printf 'refusing direct launch without WS GPU guard\n' >&2
+    exit 1
+fi
 export CUDA_MPS_ACTIVE_THREAD_PERCENTAGE=50
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 

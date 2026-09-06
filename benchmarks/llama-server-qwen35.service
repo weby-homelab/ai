@@ -10,6 +10,7 @@ WorkingDirectory=/usr/local/libexec
 Environment="LD_LIBRARY_PATH=/usr/local/libexec:/usr/local/cuda/lib64"
 Environment="CUDA_MPS_ACTIVE_THREAD_PERCENTAGE=50"
 Environment="CUDA_DEVICE_MAX_CONNECTIONS=1"
+Environment="WS_GPU_GUARD_ACTIVE=1"
 Environment="HOST=127.0.0.1"
 Environment="PORT=8080"
 ExecStart=/usr/local/bin/ws-gpu-task-50 /usr/local/libexec/start_llama_qwen35.sh
