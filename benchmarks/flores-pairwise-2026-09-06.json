@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "benchmark": "FLORES-200 devtest bounded subset",
+  "left": {
+    "model_id": "Qwen3.5-9B-MTP-Q4_0.gguf",
+    "model_file": "/mnt/nvme-models/Qwen3.5-9B-MTP-Q4_0.gguf",
+    "model_sha256": "1b69b7e765387778195c044b5aa1db9c5232568f9dbdc4704b940f612b7d7498"
+  },
+  "right": {
+    "model_id": "gemma-4-12b-it-qat-q4_0.gguf",
+    "model_file": "/mnt/nvme-models/gemma-4-12b-it-qat-q4_0.gguf",
+    "model_sha256": "93567e57a8fe10b23569b9d9ec38cd005deedf71e29477c421a4b83f418a538b"
+  },
+  "shared_dataset": {
+    "ukr_file_sha256": "7bb8f160a455fca27032bdd292dd65838b7aa5a8324c6aedd03ccdf92e20dbc4",
+    "eng_file_sha256": "612e9fbe87997617c0fa8fa8929654a4f49b728d96738112c2b86ef6a1d78d88",
+    "total_aligned_sentences": 1012,
+    "sample_limit": 50,
+    "sample_stride": 20,
+    "sample_ids": [
+      1,
+      21,
+      41,
+      61,
+      81,
+      101,
+      121,
+      141,
+      161,
+      181,
+      201,
+      221,
+      241,
+      261,
+      281,
+      301,
+      321,
+      341,
+      361,
+      381,
+      401,
+      421,
+      441,
+      461,
+      481,
+      501,
+      521,
+      541,
+      561,
+      581,
+      601,
+      621,
+      641,
+      661,
+      681,
+      701,
+      721,
+      741,
+      761,
+      781,
+      801,
+      821,
+      841,
+      861,
+      881,
+      901,
+      921,
+      941,
+      961,
+      981
+    ]
+  },
+  "shared_runtime": {
+    "seed": 42,
+    "max_tokens": 256,
+    "engine_build": "85e22ea",
+    "run_profile": "steady-mps50-no-host-pause",
+    "engine_binary_sha256": "2996eb560536e116b1fc4c751209992164c78e71882f1ab92bb2891569c148d9"
+  },
+  "directions": {
+    "en_ukr": {
+      "sentence_bleu": {
+        "left": 23,
+        "right": 26,
+        "ties": 1,
+        "mean_delta_left_minus_right": -0.610906
+      },
+      "sentence_chrf_plus_plus": {
+        "left": 26,
+        "right": 24,
+        "ties": 0,
+        "mean_delta_left_minus_right": -0.34517
+      }
+    },
+    "ukr_en": {
+      "sentence_bleu": {
+        "left": 20,
+        "right": 23,
+        "ties": 7,
+        "mean_delta_left_minus_right": -0.1508
+      },
+      "sentence_chrf_plus_plus": {
+        "left": 22,
+        "right": 23,
+        "ties": 5,
+        "mean_delta_left_minus_right": -0.253019
+      }
+    }
+  },
+  "overall": {
+    "sentence_bleu": {
+      "left": 43,
+      "right": 49,
+      "ties": 8,
+      "mean_delta_left_minus_right": -0.380853
+    },
+    "sentence_chrf_plus_plus": {
+      "left": 48,
+      "right": 47,
+      "ties": 5,
+      "mean_delta_left_minus_right": -0.299095
+    }
+  }
+}
