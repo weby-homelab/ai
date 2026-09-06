@@ -2,13 +2,15 @@
 set -Eeuo pipefail
 
 BEE_BIN="${BEE_BIN:-/root/beellama.cpp/build/bin/llama-server}"
-MODEL_PATH="${MODEL_PATH:-/mnt/nvme-models/Qwen3.5-9B-Q4_0.gguf}"
+MODEL_PATH="${MODEL_PATH:-/mnt/nvme-models/Qwen3.5-9B-MTP-Q4_0.gguf}"
 HOST="${HOST:-0.0.0.0}"
 PORT="${PORT:-8080}"
 THREADS="${THREADS:-10}"
 CONTEXT_SIZE="${CONTEXT_SIZE:-32768}"
 BATCH_SIZE="${BATCH_SIZE:-512}"
 UBATCH_SIZE="${UBATCH_SIZE:-256}"
+SPEC_TYPE="${SPEC_TYPE:-draft-mtp}"
+DRAFT_N_MAX="${DRAFT_N_MAX:-2}"
 
 export CUDA_MPS_ACTIVE_THREAD_PERCENTAGE="${CUDA_MPS_ACTIVE_THREAD_PERCENTAGE:-50}"
 export CUDA_DEVICE_MAX_CONNECTIONS="${CUDA_DEVICE_MAX_CONNECTIONS:-1}"
@@ -25,8 +27,17 @@ fi
 printf '==> BeeLlama | model=%s | context=%s | batch=%s/%s | q8 KV\n' \
     "$MODEL_PATH" "$CONTEXT_SIZE" "$BATCH_SIZE" "$UBATCH_SIZE"
 
+SPEC_ARGS=()
+if [[ "$SPEC_TYPE" != "none" ]]; then
+    SPEC_ARGS=(
+        --spec-type "$SPEC_TYPE" --spec-draft-n-max "$DRAFT_N_MAX"
+        -ctkd q8_0 -ctvd q8_0
+    )
+fi
+
 exec "$BEE_BIN" \
     -m "$MODEL_PATH" \
+    "${SPEC_ARGS[@]}" \
     -ngl 999 \
     -t "$THREADS" -Cr 0-9 -Crb 0-9 --cpu-strict 1 \
     -c "$CONTEXT_SIZE" \

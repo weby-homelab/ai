@@ -1,5 +1,5 @@
 [Unit]
-Description=Llama.cpp Server API (Qwen3.5-9B Q4_0)
+Description=Llama.cpp Server API (Qwen3.5-9B MTP Q4_0)
 After=network.target nvidia-persistenced.service nvidia-cuda-mps.service
 Requires=nvidia-cuda-mps.service
 
