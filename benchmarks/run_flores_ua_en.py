@@ -129,6 +129,22 @@ def _score(predictions: list[str], references: list[str]) -> tuple[float, float]
     return float(bleu), float(chrf)
 
 
+def _sentence_score(prediction: str, reference: str) -> tuple[float, float]:
+    try:
+        import sacrebleu
+    except ImportError as exc:
+        raise RuntimeError("sacrebleu is required for FLORES scoring") from exc
+    bleu = sacrebleu.sentence_bleu(prediction, [reference], tokenize="13a").score
+    chrf = sacrebleu.sentence_chrf(
+        prediction,
+        [reference],
+        char_order=6,
+        word_order=2,
+        beta=2,
+    ).score
+    return float(bleu), float(chrf)
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -209,6 +225,7 @@ def main() -> int:
             prediction, finish_reason = _response_text(response)
             timings = response.get("timings") or {}
             usage = response.get("usage") or {}
+            sentence_bleu, sentence_chrf = _sentence_score(prediction, example.reference)
             if prediction:
                 scored[example.direction][0].append(prediction)
                 scored[example.direction][1].append(example.reference)
@@ -218,6 +235,8 @@ def main() -> int:
                 "status": "ok" if prediction else "empty",
                 "finish_reason": finish_reason,
                 "script_ratio": round(expected_script_ratio(prediction, example.direction), 6),
+                "sentence_bleu": round(sentence_bleu, 6),
+                "sentence_chrf_plus_plus": round(sentence_chrf, 6),
                 "output_chars": len(prediction),
                 "output_sha256": hashlib.sha256(prediction.encode("utf-8")).hexdigest(),
                 "wall_ms": round((time.perf_counter() - started) * 1000, 3),
